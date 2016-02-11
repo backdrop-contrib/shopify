@@ -311,12 +311,43 @@ class ShopifyProduct extends Entity {
     // @todo images on variants
     if ($this->variant_id == 0 && isset($this->images[0]['src'])) {
       foreach ($this->images as $product_image) {
-        $file = system_retrieve_file($product_image['src'], $directory, TRUE, FILE_EXISTS_REPLACE);
+        $file = $this->downloadImage($product_image, $directory);
         image_path_flush($file->uri);
         $files[] = (array) $file;
       }
       $this->wrapper()->shopify_product_images->set($files);
     }
+  }
+
+  /**
+   * Downloads a product image from Shopify.
+   *
+   * @param array $product_image
+   *   Product image array.
+   * @param string $directory
+   *   Directory to place the image in.
+   *
+   * @return bool|mixed|\stdClass
+   */
+  function downloadImage($product_image, $directory) {
+    if (extension_loaded('curl') === TRUE) {
+      $curl = curl_init();
+      curl_setopt_array($curl, array(
+        CURLOPT_FAILONERROR => 1,
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_URL => $product_image['src'],
+      ));
+      $resp = curl_exec($curl);
+      curl_close($curl);
+      $file = file_save_data($resp, $directory);
+      if (!$file) {
+        drupal_set_message(t('Shopify image could not be saved to @path.', array('@path' => $directory)), 'error');
+      }
+    }
+    else {
+      $file = system_retrieve_file($product_image['src'], $directory, TRUE, FILE_EXISTS_REPLACE);
+    }
+    return $file;
   }
 
   /**

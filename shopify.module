@@ -1542,13 +1542,31 @@ function shopify_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Attempts to use the $selected text format, falls back to "plain_text" if the
+ * $selected format is not available.
+ *
+ * @param string $selected
+ *   The desired text format to use.
+ *
+ * @return string
+ *   Valid text format name.
+ */
+function shopify_get_text_format($selected = '') {
+  $formats = filter_formats();
+  if (!empty($selected) && isset($formats[$selected])) {
+    return $selected;
+  }
+  return "plain_text";
+}
+
+/**
  * @param $variables
  * @return string
  */
 function theme_entity_property__shopify_product__body_html(&$variables) {
   // Get the raw HTML and run it through check_markup, rather than check_plain
   // which is used in entity_property_default_render_value_by_type
-  $variables['content'] = check_markup($variables['elements']['#entity_wrapped']->{$variables['property_name']}->value(), 'full_html');
+  $variables['content'] = check_markup($variables['elements']['#entity_wrapped']->{$variables['property_name']}->value(), shopify_get_text_format('full_html'));
   $output = '';
 
   // Render the label, if it's not hidden.

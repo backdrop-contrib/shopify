@@ -17,7 +17,7 @@ function shopify_search_info() {
  * Implements hook_search_access().
  */
 function shopify_search_access() {
-  return user_access('access shopify products');
+  return user_access('view shopify products');
 }
 
 /**

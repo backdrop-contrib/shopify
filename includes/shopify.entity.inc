@@ -330,7 +330,7 @@ class ShopifyProduct extends Entity {
    * @return bool|mixed|\stdClass
    */
   function downloadImage($product_image, $directory) {
-    if (extension_loaded('curl') === TRUE) {
+    if (variable_get('shopify_download_images_using_curl', FALSE) && extension_loaded('curl') === TRUE) {
       $curl = curl_init();
       curl_setopt_array($curl, array(
         CURLOPT_FAILONERROR => 1,
@@ -340,13 +340,15 @@ class ShopifyProduct extends Entity {
       $resp = curl_exec($curl);
       curl_close($curl);
       $file = file_save_data($resp, $directory);
-      if (!$file) {
-        drupal_set_message(t('Shopify image could not be saved to @path.', array('@path' => $directory)), 'error');
-      }
     }
     else {
       $file = system_retrieve_file($product_image['src'], $directory, TRUE, FILE_EXISTS_REPLACE);
     }
+
+    if (!$file) {
+      drupal_set_message(t('Shopify image could not be saved to @path.', array('@path' => $directory)), 'error');
+    }
+
     return $file;
   }
 

@@ -16,18 +16,29 @@ function shopify_admin_theme_download($form, $form_state) {
       '@shopify_store_link' => url('http://' . shopify_store_info()->domain . '/admin/themes'),
     )),
   );
+
+  // Check to see if we can ZIP the folder contents.
+  $zip_enabled = class_exists('ZipArchive');
+  if (!$zip_enabled) {
+    drupal_set_message(t('Class <strong>ZipArchive</strong> not found. You will be unable to download or upload the Shopify Theme automatically.<br/>For help with setting up ZipArchive, !link.', array(
+      '!link' => l(t('view the documention on php.net'), 'http://php.net/manual/en/zip.setup.php'),
+    )), 'warning');
+  }
+
   $form['download']['actions'] = array(
     '#type' => 'actions',
     'download' => array(
       '#type' => 'submit',
       '#value' => t('Download Only'),
       '#name' => 'download',
+      '#disabled' => !$zip_enabled,
     ),
     'upload' => array(
       '#type' => 'submit',
       '#value' => t('Upload and Publish Automatically'),
       '#description' => t('Will be automatically uploaded to your Shopify account and set as the active theme.'),
       '#name' => 'upload',
+      '#disabled' => !$zip_enabled,
     ),
   );
 

@@ -21,7 +21,7 @@ function shopify_admin_theme_download($form, $form_state) {
   $zip_enabled = class_exists('ZipArchive');
   if (!$zip_enabled) {
     drupal_set_message(t('Class <strong>ZipArchive</strong> not found. You will be unable to download or upload the Shopify Theme automatically.<br/>For help with setting up ZipArchive, !link.', array(
-      '!link' => l(t('view the documention on php.net'), 'http://php.net/manual/en/zip.setup.php'),
+      '!link' => l(t('view the documentation on php.net'), 'http://php.net/manual/en/zip.setup.php'),
     )), 'warning');
   }
 

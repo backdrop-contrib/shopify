@@ -1222,7 +1222,13 @@ function shopify_add_to_cart_form($form, &$form_state, ShopifyProduct $product =
  */
 function shopify_money_format() {
   $format = shopify_store_info()->money_format;
-  return str_replace('{{amount}}', '', $format);
+  if ($format == '{{amount}}') {
+    return str_replace('{{amount}}', '', $format);
+  }
+  elseif ($format == '{{amount_no_decimals}}') {
+    return str_replace('{{amount_no_decimals}}', '', $format);
+  }
+  return '$';
 }
 
 /**

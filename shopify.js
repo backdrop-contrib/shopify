@@ -32,6 +32,11 @@
    */
   Drupal.shopify.updateCartQuantity = function () {
     var url = $('#shopify-cart-link').attr('href');
+    if (!url || !$('#shopify-cart-total').length) {
+      // There is no cart to update.
+      return;
+    }
+
     $.ajax({
       type: 'GET',
       url: url + '.json',

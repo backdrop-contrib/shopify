@@ -16,15 +16,12 @@ function shopify_api_requirements($phase) {
   // Runtime phase
   if ($phase == 'runtime') {
     // Load the libraries that we need
-    $libraries = shopify_api_libraries_info();
+    $libraries = shopify_api_library_info();
 
     // Iterate each library to make sure they are present
     foreach ($libraries as $key => $library) {
       // Load the library
-      $library = libraries_load($key);
-
-      // See if it's ready
-      $status = isset($library['loaded']) ? $library['loaded'] : FALSE;
+      $status = include_once(backdrop_get_path('module', 'shopify') . '/library/shopify/shopify.php');
 
       // Report the status
       $requirements[$key] = array(

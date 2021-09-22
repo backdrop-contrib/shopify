@@ -16,7 +16,7 @@ class views_handler_field_shopify_product_add_to_cart_form extends views_handler
    */
   function render($data) {
     if ($entity = $this->get_value($data)) {
-      return drupal_get_form('shopify_add_to_cart_form', $entity);
+      return backdrop_get_form('shopify_add_to_cart_form', $entity);
     }
   }
 

@@ -18,7 +18,7 @@ class views_handler_field_shopify_product extends views_handler_field {
     if (!empty($this->options['link_to_product'])) {
       $this->additional_fields['id'] = array(
         'table' => 'shopify_products',
-        'field' => 'id'
+        'field' => 'id',
       );
     }
   }
@@ -27,7 +27,7 @@ class views_handler_field_shopify_product extends views_handler_field {
     $options = parent::option_definition();
     $options['link_to_product'] = array(
       'default' => isset($this->definition['link_to_product default']) ? $this->definition['link_to_product default'] : FALSE,
-      'bool' => TRUE
+      'bool' => TRUE,
     );
     return $options;
   }

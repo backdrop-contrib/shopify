@@ -8,7 +8,10 @@ class views_handler_field_shopify_product_link extends views_handler_field_entit
 
   public function option_definition() {
     $options = parent::option_definition();
-    $options['text'] = array('default' => '', 'translatable' => TRUE);
+    $options['text'] = array(
+      'default' => '',
+      'translatable' => TRUE,
+    );
     return $options;
   }
 

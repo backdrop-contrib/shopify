@@ -4,9 +4,11 @@
  * Admin settings form.
  */
 function shopify_api_admin_settings($form, &$form_state) {
+  $config = config('shopify_api.settings');
   module_load_install('shopify_api');
 
   // Requirements
+  $form['#config'] = 'shopify_api.settings';
   $form['requirements'] = array(
     '#type' => 'fieldset',
     '#title' => t('Requirements'),
@@ -45,27 +47,27 @@ function shopify_api_admin_settings($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Domain'),
     '#required' => TRUE,
-    '#default_value' => variable_get('shopify_api_domain', ''),
+    '#default_value' => $config->get('shopify_api_domain'),
     '#description' => t('Do not include http:// or https://.'),
   );
   $form['connection']['shopify_api_token'] = array(
     '#type' => 'textfield',
     '#title' => t('Token'),
     '#required' => TRUE,
-    '#default_value' => variable_get('shopify_api_token', ''),
+    '#default_value' => $config->get('shopify_api_token'),
     '#description' => t('This may be labeled as <em>Password</em> in the Shopify private apps console.'),
   );
   $form['connection']['shopify_api_key'] = array(
     '#type' => 'textfield',
     '#title' => t('API key'),
     '#required' => TRUE,
-    '#default_value' => variable_get('shopify_api_key', ''),
+    '#default_value' => $config->get('shopify_api_key'),
   );
   $form['connection']['shopify_api_secret'] = array(
     '#type' => 'textfield',
     '#title' => t('Secret'),
     '#required' => TRUE,
-    '#default_value' => variable_get('shopify_api_secret', ''),
+    '#default_value' => $config->get('shopify_api_secret'),
   );
 
   return system_settings_form($form);

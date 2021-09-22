@@ -330,7 +330,7 @@ class ShopifyProduct extends Entity {
    * @return bool|mixed|\stdClass
    */
   function downloadImage($product_image, $directory) {
-    if (variable_get('shopify_download_images_using_curl', FALSE) && extension_loaded('curl') === TRUE) {
+    if (config_get('shopify.settings', 'shopify_download_images_using_curl') && extension_loaded('curl') === TRUE) {
       $curl = curl_init();
       curl_setopt_array($curl, array(
         CURLOPT_FAILONERROR => 1,
@@ -346,7 +346,7 @@ class ShopifyProduct extends Entity {
     }
 
     if (!$file) {
-      drupal_set_message(t('Shopify image could not be saved to @path.', array('@path' => $directory)), 'error');
+      backdrop_set_message(t('Shopify image could not be saved to @path.', array('@path' => $directory)), 'error');
     }
 
     return $file;
@@ -361,7 +361,7 @@ class ShopifyProduct extends Entity {
     foreach (array_reverse(explode(',', $this->tags)) as $tag) {
       $tag = trim($tag);
       if ($tag) {
-        $term = taxonomy_get_term_by_name($tag, 'shopify_tags');
+        $term = taxonomy_term_load_multiple_by_name($tag, 'shopify_tags');
         if (!empty($term)) {
           $tid = reset($term)->tid;
         }
@@ -431,7 +431,7 @@ class ShopifyProductController extends EntityAPIController {
       foreach ($entities as $entity) {
         if ($entity->variant_id) {
           if ($parent = shopify_product_load_single($entity->product_id)) {
-            drupal_goto('product/' . $parent->id, array('query' => array('variant_id' => $entity->variant_id)));
+            backdrop_goto('product/' . $parent->id, array('query' => array('variant_id' => $entity->variant_id)));
           }
         }
       }
@@ -445,7 +445,7 @@ class ShopifyProductController extends EntityAPIController {
   public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $content = array()) {
     $extra_fields = field_extra_fields_get_display('shopify_product', 'shopify_product', $view_mode);
     if ($extra_fields['add_to_cart']['visible']) {
-      $content['add_to_cart'] = drupal_get_form('shopify_add_to_cart_form', $entity);
+      $content['add_to_cart'] = backdrop_get_form('shopify_add_to_cart_form', $entity);
     }
     return parent::buildContent($entity, $view_mode, $langcode, $content);
   }
@@ -471,7 +471,7 @@ class ShopifyProductController extends EntityAPIController {
     if ($name == 'body_html') {
       $content[$name]['#label_hidden'] = TRUE;
     }
-    $content['#attached']['css']['entity.theme'] = drupal_get_path('module', 'entity') . '/theme/entity.theme.css';
+    $content['#attached']['css']['entity.theme'] = backdrop_get_path('module', 'entity') . '/theme/entity.theme.css';
   }
 }
 
@@ -723,8 +723,8 @@ class ShopifyProductsUIController extends EntityDefaultUIController {
 
     $results = $query->execute();
 
-    $ids = isset($results[$this->entityType]) ? array_keys($results[$this->entityType]) : array();
-    $entities = $ids ? entity_load($this->entityType, $ids) : array();
+    $ids = isset($results[$this->entityType])?array_keys($results[$this->entityType]) : array();
+    $entities = $ids?entity_load($this->entityType, $ids) : array();
     ksort($entities);
 
     $rows = array();
@@ -755,9 +755,9 @@ class ShopifyProductsUIController extends EntityDefaultUIController {
       'data' => array(
         '#theme' => 'entity_ui_overview_item',
         '#label' => entity_label($this->entityType, $entity),
-        '#name' => !empty($this->entityInfo['exportable']) ? entity_id($this->entityType, $entity) : FALSE,
+        '#name' => !empty($this->entityInfo['exportable'])?entity_id($this->entityType, $entity) : FALSE,
         '#url' => $entity_uri ? $entity_uri : FALSE,
-        '#entity_type' => $this->entityType
+        '#entity_type' => $this->entityType,
       ),
     );
 
@@ -772,7 +772,7 @@ class ShopifyProductsUIController extends EntityDefaultUIController {
         'data' => array(
           '#theme' => 'entity_status',
           '#status' => $entity->{$this->statusKey},
-        )
+        ),
       );
     }
     // In case this is a bundle, we add links to the field ui tabs.
@@ -786,11 +786,11 @@ class ShopifyProductsUIController extends EntityDefaultUIController {
     if (entity_has_status($this->entityType, $entity, ENTITY_FIXED)) {
       $row[] = array(
         'data' => l(t('clone'), $this->path . '/manage/' . $id . '/clone'),
-        'colspan' => $this->operationCount()
+        'colspan' => $this->operationCount(),
       );
     }
     else {
-      $row[] = l(t('Edit Drupal Entity'), $this->path . '/manage/' . $id);
+      $row[] = l(t('Edit Backdrop Entity'), $this->path . '/manage/' . $id);
 
       if ($field_ui) {
         $row[] = l(t('manage fields'), $this->path . '/manage/' . $id . '/fields');
@@ -803,7 +803,7 @@ class ShopifyProductsUIController extends EntityDefaultUIController {
         $row[] = l(t('clone'), $this->path . '/manage/' . $id . '/clone');
       }
       if (entity_has_status($this->entityType, $entity, ENTITY_OVERRIDDEN)) {
-        $row[] = l(t('revert'), $this->path . '/manage/' . $id . '/revert', array('query' => drupal_get_destination()));
+        $row[] = l(t('revert'), $this->path . '/manage/' . $id . '/revert', array('query' => backdrop_get_destination()));
       }
     }
     if ($exportable) {

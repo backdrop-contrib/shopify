@@ -1,10 +1,16 @@
 <?php
+/**
+ * @file
+ * Install, update and uninstall functions for the shopify_api module.
+ *
+ */
+
 
 /**
  * Implements hook_requirements().
  */
 function shopify_api_requirements($phase) {
-  drupal_load('module', 'shopify_api');
+  backdrop_load('module', 'shopify_api');
   $requirements = array();
 
   // Runtime phase
@@ -23,9 +29,9 @@ function shopify_api_requirements($phase) {
       // Report the status
       $requirements[$key] = array(
         'title' => t('!name library', array('!name' => $library['name'])),
-        'value' => $status ? t('Installed (%version)', array('%version' => $library['version'])) : t('Missing'),
-        'description' => !$status ? t('The !name library is required for Shopify API to work. !link it and add it to your libraries directory.', array('!name' => $library['name'], '!link' => l(t('Download'), $library['download url']))) : '',
-        'severity' => $status ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+        'value' => $status?t('Installed (%version)', array('%version' => $library['version'])) : t('Missing'),
+        'description' => !$status?t('The !name library is required for Shopify API to work. !link it and add it to your libraries directory.', array('!name' => $library['name'], '!link' => l(t('Download'), $library['download url']))) : '',
+        'severity' => $status?REQUIREMENT_OK : REQUIREMENT_ERROR,
       );
     }
   }
@@ -45,6 +51,32 @@ function shopify_api_uninstall() {
   );
 
   foreach ($vars as $var) {
+    // TODO This variable was probably removed in Backdrop without replacement.
     variable_del($var);
   }
+}
+
+/**
+ * Migrate shopify_api variables to config.
+ */
+function shopify_api_update_1000() {
+  $config = config('shopify_api.settings');
+  $config->set('shopify_api_domain', update_variable_get('shopify_api_domain', ''));
+  $config->set('shopify_api_token', update_variable_get('shopify_api_token', ''));
+  $config->set('shopify_api_key', update_variable_get('shopify_api_key', 'dynamic variable in file /shopify/shopify_api/shopify_api.module line 67'));
+  $config->set('shopify_api_secret', update_variable_get('shopify_api_secret', ''));
+  $config->save();
+
+  update_variable_del('shopify_api_domain');
+  update_variable_del('shopify_api_token');
+  update_variable_del('shopify_api_key');
+  update_variable_del('shopify_api_secret');
+}
+
+/**
+ * Implements hook_install().
+ */
+function shopify_api_install() {
+  // Dynamically generated variable data was detected.
+  // /shopify/shopify_api/shopify_api.module line 67
 }

@@ -46,7 +46,7 @@ function shopify_rules_api_call_action_access($type, $name) {
  * Callback for Shopify rules action.
  */
 function shopify_api_call_action($method, $path, $data) {
-  return shopify_api_call($method, $path, drupal_json_decode($data));
+  return shopify_api_call($method, $path, backdrop_json_decode($data));
 }
 
 /**
@@ -511,7 +511,7 @@ function shopify_rules_address_property_info() {
     ),
     'city' => array(
       'type' => 'text',
-      'label' => t('City')
+      'label' => t('City'),
     ),
     'company' => array(
       'type' => 'text',

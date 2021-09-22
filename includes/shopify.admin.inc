@@ -12,7 +12,7 @@ function shopify_admin_theme_download($form, $form_state) {
   $form['download'] = array(
     '#type' => 'fieldset',
     '#title' => t('Shopify Theme'),
-    '#description' => t('Download this starter Shopify theme then upload it manually to your <a target="_blank" href="@shopify_store_link">Shopify store</a>, or use the "Upload and Publish Automatically" feature. <span style="color: red">Automatic upload requires this website be publicly accessible from the internet.</span><br /><br />This theme will disable most Shopify store features except for the shopping cart and customer login area, and will redirect the user to your store on your Drupal site if they attempt to access areas covered by this module like products, tags, or collections.<br /><br />We <strong>highly recommend</strong> using this theme generator as a starting point for your Shopify theme. Once uploaded you may use the Shopify theme GUI to match your site\'s colors, fonts, etc.', array(
+    '#description' => t('Download this starter Shopify theme then upload it manually to your <a target="_blank" href="@shopify_store_link">Shopify store</a>, or use the "Upload and Publish Automatically" feature. <span style="color: red">Automatic upload requires this website be publicly accessible from the internet.</span><br /><br />This theme will disable most Shopify store features except for the shopping cart and customer login area, and will redirect the user to your store on your Backdrop site if they attempt to access areas covered by this module like products, tags, or collections.<br /><br />We <strong>highly recommend</strong> using this theme generator as a starting point for your Shopify theme. Once uploaded you may use the Shopify theme GUI to match your site\'s colors, fonts, etc.', array(
       '@shopify_store_link' => url('http://' . shopify_store_info()->domain . '/admin/themes'),
     )),
   );
@@ -20,7 +20,7 @@ function shopify_admin_theme_download($form, $form_state) {
   // Check to see if we can ZIP the folder contents.
   $zip_enabled = class_exists('ZipArchive');
   if (!$zip_enabled) {
-    drupal_set_message(t('Class <strong>ZipArchive</strong> not found. You will be unable to download or upload the Shopify Theme automatically.<br/>For help with setting up ZipArchive, !link.', array(
+    backdrop_set_message(t('Class <strong>ZipArchive</strong> not found. You will be unable to download or upload the Shopify Theme automatically.<br/>For help with setting up ZipArchive, !link.', array(
       '!link' => l(t('view the documentation on php.net'), 'http://php.net/manual/en/zip.setup.php'),
     )), 'warning');
   }
@@ -43,7 +43,7 @@ function shopify_admin_theme_download($form, $form_state) {
   );
 
   $protocol = stripos($_SERVER['SERVER_PROTOCOL'], 'https') === TRUE ? 'https://' : 'http://';
-  $fqdn = $protocol . "$_SERVER[HTTP_HOST]";
+  $fqdn = $protocol . "$_SERVER [HTTP_HOST]";
   $form['download']['hostname'] = array(
     '#type' => 'textfield',
     '#title' => t('Hostname'),
@@ -73,57 +73,63 @@ function shopify_admin_theme_download_submit($form, $form_state) {
   $fqdn = $form_state['values']['hostname'];
   // Copy the default theme to a temp folder.
   try {
-    shopify_recurse_copy(drupal_get_path('module', 'shopify') . '/default_shopify_theme', file_directory_temp() . '/default_shopify_theme');
-  } catch (Exception $e) {
-    drupal_set_message(t('Could not copy default_shopify_theme to the temp directory: @error', array('@error' => $e->getMessage())), 'error');
+    shopify_recurse_copy(backdrop_get_path('module', 'shopify') . '/default_shopify_theme', file_directory_temp() . '/default_shopify_theme');
+  }
+  catch (Exception $e) {
+    backdrop_set_message(t('Could not copy default_shopify_theme to the temp directory: @error', array('@error' => $e->getMessage())), 'error');
   }
 
   // Modify the {{ replace }} contents within theme files.
   try {
-    shopify_find_and_replace(file_directory_temp() . '/default_shopify_theme/*', '{{ drupal.site.url }}', url($fqdn, array('absolute' => TRUE)));
-  } catch (Exception $e) {
-    drupal_set_message(t('Could not find and replace placeholder text: @error', array('@error' => $e->getMessage())), 'error');
+    shopify_find_and_replace(file_directory_temp() . '/default_shopify_theme/*', '{{ backdrop.site.url }}', url($fqdn, array('absolute' => TRUE)));
+  }
+  catch (Exception $e) {
+    backdrop_set_message(t('Could not find and replace placeholder text: @error', array('@error' => $e->getMessage())), 'error');
   }
 
   // Modify the {{ replace }} contents within theme files.
   try {
-    shopify_find_and_replace(file_directory_temp() . '/default_shopify_theme/*', '{{ drupal.store.url }}', url($fqdn . shopify_store_path(), array('absolute' => TRUE)));
-  } catch (Exception $e) {
-    drupal_set_message(t('Could not find and replace placeholder text: @error', array('@error' => $e->getMessage())), 'error');
+    shopify_find_and_replace(file_directory_temp() . '/default_shopify_theme/*', '{{ backdrop.store.url }}', url($fqdn . shopify_store_path(), array('absolute' => TRUE)));
+  }
+  catch (Exception $e) {
+    backdrop_set_message(t('Could not find and replace placeholder text: @error', array('@error' => $e->getMessage())), 'error');
   }
 
   // Zip the theme folder.
   try {
     shopify_zip_folder(file_directory_temp() . '/default_shopify_theme');
-  } catch (Exception $e) {
-    drupal_set_message(t('Could not ZIP the default_shopify_theme folder: @error', array('@error' => $e->getMessage())), 'error');
+  }
+  catch (Exception $e) {
+    backdrop_set_message(t('Could not ZIP the default_shopify_theme folder: @error', array('@error' => $e->getMessage())), 'error');
   }
 
   if ($form_state['triggering_element']["#name"] == 'download') {
     // Download the file to the user's browser.
     try {
       shopify_theme_download('default_shopify_theme.zip');
-    } catch (Exception $e) {
-      drupal_set_message(t('Could not download the ZIP folder: @error', array('@error' => $e->getMessage())), 'error');
+    }
+    catch (Exception $e) {
+      backdrop_set_message(t('Could not download the ZIP folder: @error', array('@error' => $e->getMessage())), 'error');
     }
   }
   elseif ($form_state['triggering_element']['#name'] == 'upload') {
     // Try to upload this zip file for the user.
     try {
       // Create a secure URL.
-      $sig = hash_hmac('sha256', REQUEST_TIME . 'default_shopify_theme.zip', variable_get('shopify_api_secret'));
+      $sig = hash_hmac('sha256', REQUEST_TIME . 'default_shopify_theme.zip', config_get('shopify.settings', 'shopify_api_secret'));
       shopify_api_call('POST', 'themes', array(
         'theme' => array(
-          'name' => 'Drupal Shopify Theme',
+          'name' => 'Backdrop Shopify Theme',
           'src' => url('shopify/theme/download/' . REQUEST_TIME . '/' . $sig . '/default_shopify_theme.zip', array('absolute' => TRUE)),
           'role' => 'main',
         ),
       ));
-      drupal_set_message(t('Drupal Shopify Theme was uploaded to your store. !link.', array(
+      backdrop_set_message(t('Backdrop Shopify Theme was uploaded to your store. !link.', array(
         '!link' => l('View now', 'https://' . shopify_store_info()->domain . '/admin/themes', array('attributes' => array('target' => '_blank'))),
       )));
-    } catch (Exception $e) {
-      drupal_set_message(t('Could not upload the ZIP folder: @error', array('@error' => $e->getMessage())), 'error');
+    }
+    catch (Exception $e) {
+      backdrop_set_message(t('Could not upload the ZIP folder: @error', array('@error' => $e->getMessage())), 'error');
     }
   }
 }
@@ -222,8 +228,9 @@ function shopify_recurse_copy($src, $dst) {
 function shopify_admin_page() {
   try {
     $info = shopify_api_get_shop_info(TRUE);
-  } catch (Exception $e) {
-    drupal_set_message($e->getMessage(), 'error');
+  }
+  catch (Exception $e) {
+    backdrop_set_message($e->getMessage(), 'error');
     return t('<ul><li>Do you have a <a target="_blank" href="@signup">Shopify account</a>?</li><li>If you have an account you\'ll need to create your API key if you haven\'t already. See <a target="_blank" href="@api_key">https://docs.shopify.com/support/configuration/apps/where-do-i-find-my-api-key</a> for more information.</li><li>Have you checked your <a href="@api_config">API settings to make sure they match?</a></li><li><a href="@status_page">Can your server make outgoing HTTP requests?</li></ul>', array(
       '@signup' => url('https://www.shopify.com/?ref=bonify'),
       '@api_key' => url('https://docs.shopify.com/support/configuration/apps/where-do-i-find-my-api-key'),
@@ -238,7 +245,7 @@ function shopify_admin_page() {
     ->execute()->rowCount();
 
   if (!$product_count) {
-    drupal_set_message(t('Did you !link to your site yet?', array(
+    backdrop_set_message(t('Did you !link to your site yet?', array(
       '!link' => l(t('sync products'), 'admin/shopify/sync'),
     )), 'warning');
   }
@@ -250,7 +257,7 @@ function shopify_admin_page() {
     ->execute()->rowCount();
 
   if (!$collection_count) {
-    drupal_set_message(t('Did you !link to your site yet?', array(
+    backdrop_set_message(t('Did you !link to your site yet?', array(
       '!link' => l(t('sync collections'), 'admin/shopify/sync'),
     )), 'warning');
   }
@@ -277,15 +284,17 @@ function shopify_admin_page() {
  * Shopify products sync page form.
  */
 function shopify_admin_sync_form($form, &$form_state) {
+  $config = config('shopify.settings');
 
   try {
     shopify_api_get_shop_info(TRUE);
-  } catch (Exception $e) {
-    drupal_set_message($e->getMessage(), 'error');
+  }
+  catch (Exception $e) {
+    backdrop_set_message($e->getMessage(), 'error');
     return array();
   }
 
-  $last_updated = variable_get('shopify_last_product_sync');
+  $last_updated = $config->get('shopify_last_product_sync');
   if ($last_updated == '1970-01-01 00:00' || !$last_updated) {
     $last_updated = 'never';
   }
@@ -330,7 +339,7 @@ function shopify_admin_sync_form($form, &$form_state) {
     '#submit' => array('shopify_admin_product_sync_form_submit'),
   );
 
-  $last_updated = variable_get('shopify_last_collection_sync');
+  $last_updated = $config->get('shopify_last_collection_sync');
   if ($last_updated == '1970-01-01 00:00' || !$last_updated) {
     $last_updated = 'never';
   }
@@ -365,18 +374,18 @@ function shopify_admin_sync_form($form, &$form_state) {
   $form['cron']['sync_products'] = array(
     '#type' => 'checkbox',
     '#title' => t('Sync Products on cron run.'),
-    '#default_value' => variable_get('shopify_cron_sync_products', FALSE),
+    '#default_value' => $config->get('shopify_cron_sync_products'),
   );
   $form['cron']['sync_collections'] = array(
     '#type' => 'checkbox',
     '#title' => t('Sync Collections on cron run.'),
-    '#default_value' => variable_get('shopify_cron_sync_collections', FALSE),
+    '#default_value' => $config->get('shopify_cron_sync_collections'),
   );
   $form['cron']['sync_time'] = array(
     '#type' => 'textfield',
     '#title' => t('How often to sync'),
     '#description' => t('Enter the number of seconds to wait to sync between cron runs.<br />To sync once per day, enter "86400". To sync once per hour, enter "3600".<br />Leave empty or "0" to sync on every cron run.'),
-    '#default_value' => variable_get('shopify_cron_sync_time', 0),
+    '#default_value' => $config->get('shopify_cron_sync_time'),
   );
   $form['cron']['save_cron'] = array(
     '#type' => 'submit',
@@ -419,7 +428,7 @@ function shopify_admin_delete_orphaned_tags_form_submit($form, &$form_state) {
   $terms = shopify_get_orphaned_tags();
   foreach ($terms as $term) {
     taxonomy_term_delete($term->tid);
-    drupal_set_message(t('Deleted term "%name".', array('%name' => $term->name)));
+    backdrop_set_message(t('Deleted term "%name".', array('%name' => $term->name)));
   }
   $form_state['redirect'] = 'admin/shopify/sync';
 }
@@ -429,9 +438,9 @@ function shopify_admin_delete_orphaned_tags_form_submit($form, &$form_state) {
  */
 function shopify_admin_cron_sync_form_submit($form, $form_state) {
   $v = $form_state['values'];
-  variable_set('shopify_cron_sync_products', $v['cron']['sync_products']);
-  variable_set('shopify_cron_sync_collections', $v['cron']['sync_collections']);
-  variable_set('shopify_cron_sync_time', $v['cron']['sync_time']);
+  config_set('shopify.settings', 'shopify_cron_sync_products', $v['cron']['sync_products']);
+  config_set('shopify.settings', 'shopify_cron_sync_collections', $v['cron']['sync_collections']);
+  config_set('shopify.settings', 'shopify_cron_sync_time', $v['cron']['sync_time']);
 }
 
 /**
@@ -471,7 +480,7 @@ function shopify_sync_collections_batch($params) {
   $batch = array(
     'operations' => $operations,
     'finished' => 'shopify_sync_collections_batch_finished',
-    'file' => drupal_get_path('module', 'shopify') . '/includes/shopify.admin.inc',
+    'file' => backdrop_get_path('module', 'shopify') . '/includes/shopify.admin.inc',
   );
   return $batch;
 }
@@ -506,21 +515,21 @@ function shopify_sync_collections_batch_op($collection, $operation_details, &$co
  */
 function shopify_sync_collections_batch_finished($success, $results, $operations) {
   if ($success) {
-    drupal_set_message(t('Processed @count collections.', array('@count' => count($results))));
+    backdrop_set_message(t('Processed @count collections.', array('@count' => count($results))));
     $datetime = new DateTime();
     $last_updated = $datetime->format('Y-m-d H:i');
-    variable_set('shopify_last_collection_sync', $last_updated);
+    config_set('shopify.settings', 'shopify_last_collection_sync', $last_updated);
   }
   else {
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     $error_operation = reset($operations);
-    drupal_set_message(
+    backdrop_set_message(
       t('An error occurred while processing @operation with arguments : @args',
         array(
-          '@operation' => $error_operation[0],
-          '@args' => print_r($error_operation[0], TRUE),
-        )
+      '@operation' => $error_operation[0],
+      '@args' => print_r($error_operation[0], TRUE),
+    )
       )
     );
   }
@@ -555,8 +564,8 @@ function shopify_sync_products_batch($params) {
   // Get count of products
   $num_products = shopify_api_get_product_count(
     array(
-      'updated_at_min' => variable_get('shopify_last_product_sync')
-    )
+    'updated_at_min' => config_get('shopify.settings', 'shopify_last_product_sync'),
+  )
   );
   $num_operations = ceil($num_products / $params['num_per_batch']);
   $operations = array();
@@ -583,7 +592,7 @@ function shopify_sync_products_batch($params) {
   $batch = array(
     'operations' => $operations,
     'finished' => 'shopify_sync_products_batch_finished',
-    'file' => drupal_get_path('module', 'shopify') . '/includes/shopify.admin.inc',
+    'file' => backdrop_get_path('module', 'shopify') . '/includes/shopify.admin.inc',
   );
   return $batch;
 }
@@ -594,7 +603,7 @@ function shopify_sync_products_batch($params) {
 function shopify_sync_collections_deleted_batch_op(&$context) {
   // Tell the user that we deleted some collections.
   if ($deleted = shopify_sync_deleted_collections(array('limit' => 250)) > 0) {
-    drupal_set_message(t('Deleted @count from the store.', array(
+    backdrop_set_message(t('Deleted @count from the store.', array(
       '@count' => format_plural($deleted, '@count collection', '@count collections'),
     )));
     $context['message'] = t('Deleting orphaned collections...');
@@ -607,7 +616,7 @@ function shopify_sync_collections_deleted_batch_op(&$context) {
 function shopify_sync_products_deleted_batch_op(&$context) {
   // Tell the user that we deleted some products/variants.
   if ($deleted = shopify_sync_deleted_products(array('limit' => 250)) > 0) {
-    drupal_set_message(t('Deleted @count from the store.', array(
+    backdrop_set_message(t('Deleted @count from the store.', array(
       '@count' => format_plural($deleted, '@count product/variant', '@count products/variants'),
     )));
     $context['message'] = t('Deleting orphaned products/variants...');
@@ -620,10 +629,10 @@ function shopify_sync_products_deleted_batch_op(&$context) {
 function shopify_sync_products_batch_op($page, $num_per_batch, $operation_details, &$context) {
   $products = shopify_api_get_products(
     array(
-      'page' => $page,
-      'limit' => $num_per_batch,
-      'updated_at_min' => variable_get('shopify_last_product_sync')
-    )
+    'page' => $page,
+    'limit' => $num_per_batch,
+    'updated_at_min' => config_get('shopify.settings', 'shopify_last_product_sync'),
+  )
   );
   foreach ($products as $product) {
     $shopify_product = shopify_product_update($product['id'], 0, $product);
@@ -647,21 +656,21 @@ function shopify_sync_products_batch_op($page, $num_per_batch, $operation_detail
  */
 function shopify_sync_products_batch_finished($success, $results, $operations) {
   if ($success) {
-    drupal_set_message(t('Processed @count products and variants.', array('@count' => count($results))));
+    backdrop_set_message(t('Processed @count products and variants.', array('@count' => count($results))));
     $datetime = new DateTime();
     $last_updated = $datetime->format('Y-m-d H:i');
-    variable_set('shopify_last_product_sync', $last_updated);
+    config_set('shopify.settings', 'shopify_last_product_sync', $last_updated);
   }
   else {
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     $error_operation = reset($operations);
-    drupal_set_message(
+    backdrop_set_message(
       t('An error occurred while processing @operation with arguments : @args',
         array(
-          '@operation' => $error_operation[0],
-          '@args' => print_r($error_operation[0], TRUE),
-        )
+      '@operation' => $error_operation[0],
+      '@args' => print_r($error_operation[0], TRUE),
+    )
       )
     );
   }
@@ -671,11 +680,13 @@ function shopify_sync_products_batch_finished($success, $results, $operations) {
  * Shopify webhooks admin form.
  */
 function shopify_webhooks_admin($form, &$form_state) {
+  $config = config('shopify.settings');
   try {
     $webhooks = shopify_api_get_webhooks();
-  } catch (Exception $e) {
+  }
+  catch (Exception $e) {
     $message = $e->getMessage();
-    drupal_set_message($message, 'error');
+    backdrop_set_message($message, 'error');
     return '';
   }
   $form['#tree'] = TRUE;
@@ -819,7 +830,7 @@ function shopify_webhooks_admin($form, &$form_state) {
       '#type' => 'fieldset',
       '#title' => t(str_replace('_', ' ', ucwords($group_name))),
       '#collapsible' => TRUE,
-      '#collapsed' => ($group_name == 'products' || $group_name == 'collections') ? FALSE : TRUE,
+      '#collapsed' => ($group_name == 'products' || $group_name == 'collections')?FALSE : TRUE,
     );
 
     foreach ($group_options as $topic => $description) {
@@ -831,12 +842,12 @@ function shopify_webhooks_admin($form, &$form_state) {
   }
 
   $protocol = stripos($_SERVER['SERVER_PROTOCOL'], 'https') === TRUE ? 'https://' : 'http://';
-  $current = $protocol . "$_SERVER[HTTP_HOST]";
+  $current = $protocol . "$_SERVER [HTTP_HOST]";
 
   $form['register']['hostname'] = array(
     '#type' => 'textfield',
     '#title' => t('Hostname'),
-    '#default_value' => variable_get('shopify_last_registered_host', $current),
+    '#default_value' => $config->get('shopify_last_registered_host'),
     '#size' => 60,
     '#required' => TRUE,
     '#description' => t('Do not include a trailing slash.'),
@@ -845,7 +856,7 @@ function shopify_webhooks_admin($form, &$form_state) {
   $form['debug'] = array(
     '#type' => 'checkbox',
     '#title' => t('Debug webhooks in watchdog'),
-    '#default_value' => variable_get('shopify_webhooks_debug', FALSE),
+    '#default_value' => $config->get('shopify_webhooks_debug'),
   );
 
   $form['save'] = array(
@@ -888,8 +899,8 @@ function shopify_register_webhooks_validate($form, &$form_state) {
 function shopify_register_webhooks_submit($form, &$form_state) {
   $values = $form_state['values'];
 
-  variable_set('shopify_webhooks_debug', $values['debug']);
-  variable_set('shopify_last_registered_host', $values['register']['hostname']);
+  config_set('shopify.settings', 'shopify_webhooks_debug', $values['debug']);
+  config_set('shopify.settings', 'shopify_last_registered_host', $values['register']['hostname']);
 
   if ($form_state['values']['op'] == t('Save')) {
 
@@ -904,12 +915,13 @@ function shopify_register_webhooks_submit($form, &$form_state) {
             'webhook' => array(
               'topic' => "$group/$topic",
               'address' => $hostname . '/shopify/webhook',
-              'format' => "json"
+              'format' => "json",
             ),
           );
           try {
             shopify_api_create_webhook($hook);
-          } catch (ShopifyApiException $e) {
+          }
+          catch (ShopifyApiException $e) {
             $response = $e->getResponse();
             if (isset($response['errors']['address'])) {
               $message = $hostname . ' address ' . $response['errors']['address'][0];
@@ -917,9 +929,9 @@ function shopify_register_webhooks_submit($form, &$form_state) {
             else {
               $message = $response['errors'];
             }
-            drupal_set_message(t('Shopify says there was a problem with @topic: @errors', array(
+            backdrop_set_message(t('Shopify says there was a problem with @topic: @errors', array(
               '@errors' => $message,
-              '@topic' => "$group/$topic"
+              '@topic' => "$group/$topic",
             )), 'warning');
           }
         }

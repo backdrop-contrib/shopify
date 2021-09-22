@@ -13,7 +13,7 @@ function shopify_incoming_webhook() {
   $hook = str_replace('/', '_', $_SERVER['HTTP_X_SHOPIFY_TOPIC']);
 
   // Log webhooks if the debug option is set.
-  if (variable_get('shopify_webhooks_debug', FALSE)) {
+  if (config_get('shopify.settings', 'shopify_webhooks_debug')) {
     watchdog('shopify_webhook', $hook . ':' . check_plain(var_export($payload, TRUE)));
   }
 
@@ -88,7 +88,7 @@ function shopify_shopify_webhook_orders_paid($order) {
  */
 function shopify_shopify_webhook_shop_update($payload) {
   // Update store info on the site.
-  variable_set('shopify_store_info', $payload);
+  config_set('shopify.settings', 'shopify_store_info', $payload);
 }
 
 /**

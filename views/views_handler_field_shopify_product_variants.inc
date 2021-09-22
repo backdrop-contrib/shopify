@@ -13,7 +13,10 @@ class views_handler_field_shopify_product_variants extends views_handler_field_e
 
   public function option_definition() {
     $options = parent::option_definition();
-    $options['view_mode'] = array('default' => '', 'translatable' => TRUE);
+    $options['view_mode'] = array(
+      'default' => '',
+      'translatable' => TRUE,
+    );
     return $options;
   }
 

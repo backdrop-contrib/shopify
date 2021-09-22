@@ -1,6 +1,7 @@
 name = Shopify eCommerce
 description = Display your Shopify store within your Drupal site.
-core = 7.x
+backdrop = 1.x
+type = module
 
 dependencies[] = entity (>=1.6)
 dependencies[] = shopify_api
@@ -14,10 +15,3 @@ scripts[] = shopify.js
 
 package = Shopify
 
-files[] = includes/shopify.entity.inc
-files[] = views/views_handler_field_shopify_product_add_to_cart_form.inc
-files[] = views/views_handler_field_shopify_product_variants.inc
-files[] = views/views_handler_field_shopify_product_link.inc
-files[] = views/views_handler_field_shopify_product_edit_link.inc
-files[] = views/views_handler_field_shopify_product.inc
-files[] = views/views_handler_field_shopify_price.inc

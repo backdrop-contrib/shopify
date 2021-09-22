@@ -50,7 +50,7 @@ function shopify_search_execute($keys = NULL, $conditions = NULL) {
   $results = array();
   foreach ($products as $product) {
     $build = entity_view('shopify_product', array($product), 'search_result');
-    $rendered = drupal_render($build);
+    $rendered = backdrop_render($build);
     $uri = entity_uri('shopify_product', $product);
     $results[] = array(
       'link' => url($uri['path'], array_merge($uri['options'], array('absolute' => TRUE))),
@@ -76,7 +76,7 @@ function shopify_search_status() {
  * Implements hook_update_index().
  */
 function shopify_update_index() {
-  $limit = (int) variable_get('search_cron_limit', 100);
+  $limit = (int) config_get('search.settings', 'search_cron_limit');
 
   $result = db_query_range("SELECT id FROM {shopify_products} sp LEFT JOIN {search_dataset} d ON d.type = 'shopify_product' AND d.sid = sp.id WHERE d.sid IS NULL AND sp.variant_id = 0 OR d.reindex <> 0  ORDER BY d.reindex ASC, sp.id ASC", 0, $limit, array(), array('target' => 'slave'));
 
@@ -97,12 +97,12 @@ function _shopify_index_product($product) {
 
   // Save the changed time of the most recent indexed product, for the search
   // results half-life calculation.
-  variable_set('shopify_cron_last', $product->updated_at);
+  config_set('shopify.settings', 'shopify_cron_last', $product->updated_at);
 
   // Render the product.
   $build = entity_view('shopify_product', array($product), 'search_index');
   unset($build['#theme']);
-  $product->rendered = drupal_render($build);
+  $product->rendered = backdrop_render($build);
 
   $text = '<h1>' . check_plain($product->title) . '</h1>' . $product->rendered;
 

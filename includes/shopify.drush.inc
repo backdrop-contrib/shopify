@@ -80,7 +80,7 @@ function shopify_drush_help($command) {
 function drush_shopify_sync($type) {
   $options = array();
   if ($query = drush_get_option('options')) {
-    $options = drupal_get_query_array($query);
+    $options = backdrop_get_query_array($query);
   }
   switch ($type) {
     case 'products':
@@ -157,12 +157,13 @@ function drush_shopify_api($method, $path) {
       $options = (array) $json;
     }
     else {
-      $options = drupal_get_query_array($query);
+      $options = backdrop_get_query_array($query);
     }
   }
   try {
     $response = shopify_api_call($method, $path, $options);
-  } catch (Exception $e) {
+  }
+  catch (Exception $e) {
     return drush_set_error('API Error: ' . $e->getMessage());
   }
   drush_print('Results:');

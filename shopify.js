@@ -4,7 +4,7 @@
  */
 (function ($) {
 
-  Drupal.shopify = {
+  Backdrop.shopify = {
     ctx: {},
     settings: {}
   };
@@ -12,12 +12,12 @@
   /**
    * Display an "Added to cart" message by sending a POST request to the backend.
    */
-  Drupal.shopify.display_add_to_cart_message = function () {
+  Backdrop.shopify.display_add_to_cart_message = function () {
     var $forms = $('form.shopify-add-to-cart-form');
     $forms.unbind('submit').submit(function (e) {
       var $form = $(this);
       e.preventDefault();
-      $.post(Drupal.settings.basePath + '?q=shopify/added-to-cart', {
+      $.post(Backdrop.settings.basePath + '?q=shopify/added-to-cart', {
         product_id: $form.data('product-id'),
         variant_id: $form.data('variant-id'),
         quantity: $form.find('input[name="quantity"]').val()
@@ -30,7 +30,7 @@
   /**
    * Displays the cart quantity.
    */
-  Drupal.shopify.updateCartQuantity = function () {
+  Backdrop.shopify.updateCartQuantity = function () {
     var url = $('#shopify-cart-link').attr('href');
     if (!url || !$('#shopify-cart-total').length) {
       // There is no cart to update.
@@ -51,12 +51,12 @@
     });
   };
 
-  Drupal.behaviors.shopify = {
+  Backdrop.behaviors.shopify = {
     attach: function (context, settings) {
-      Drupal.shopify.ctx = context;
-      Drupal.shopify.settings = settings;
-      Drupal.shopify.display_add_to_cart_message();
-      Drupal.shopify.updateCartQuantity();
+      Backdrop.shopify.ctx = context;
+      Backdrop.shopify.settings = settings;
+      Backdrop.shopify.display_add_to_cart_message();
+      Backdrop.shopify.updateCartQuantity();
     }
   }
 

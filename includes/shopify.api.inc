@@ -23,10 +23,10 @@ define('SHOPIFY_API_CALL_TIMEOUT', 500);
  * @throws \ShopifyApiException
  */
 function shopify_api_call($method, $path, array $options = array()) {
-  if ($timeout = variable_get('shopify_api_next_timeout', 0)) {
+  if ($timeout = config_get('shopify.settings', 'shopify_api_next_timeout')) {
     // Sleep for a while to let the bucket empty out a bit.
     usleep($timeout * 1000);
-    variable_set('shopify_api_next_timeout', 0);
+    config_set('shopify.settings', 'shopify_api_next_timeout', 0);
   }
   $client = shopify_api_client();
   if (!$client instanceof ShopifyClient) {
@@ -34,7 +34,7 @@ function shopify_api_call($method, $path, array $options = array()) {
   }
   $result = $client->call($method, '/admin/' . $path . '.json', $options);
   if (shopify_api_call_limit_reached($client)) {
-    variable_set('shopify_api_next_timeout', shopify_api_get_next_timeout());
+    config_set('shopify.settings', 'shopify_api_next_timeout', shopify_api_get_next_timeout());
   }
   return $result;
 }
@@ -50,7 +50,8 @@ function shopify_api_call($method, $path, array $options = array()) {
  *   Number of ms to delay.
  */
 function shopify_api_get_next_timeout() {
-  return variable_get('shopify_api_call_timeout', SHOPIFY_API_CALL_TIMEOUT) * rand(1, variable_get('shopify_api_call_timeout_multiplier', 4));
+  $config = config('shopify.settings');
+  return $config->get('shopify_api_call_timeout') * rand(1, $config->get('shopify_api_call_timeout_multiplier'));
 }
 
 /**
@@ -67,7 +68,8 @@ function shopify_api_call_limit_reached(ShopifyClient $client) {
     if ($client->callsMade() >= ($client->callLimit() - 2)) {
       return TRUE;
     }
-  } catch (Exception $e) {
+  }
+  catch (Exception $e) {
     // Cannot get the callsMade(), can safely assume limit is not reached.
     return FALSE;
   }
@@ -89,7 +91,7 @@ function shopify_api_get_shop_info($refresh = FALSE) {
   $info = (array) shopify_store_info();
   if ($refresh == TRUE || empty($info)) {
     $info = shopify_api_call('GET', 'shop');
-    variable_set('shopify_store_info', $info);
+    config_set('shopify.settings', 'shopify_store_info', $info);
   }
   return (object) $info;
 }

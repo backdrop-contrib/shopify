@@ -12,11 +12,11 @@ What does this module do?
 - Creates a block with links to each Collection page to use as a menu. New collections are added automatically.
 - Provides a cart block which shows the amount of items in a user's cart and links to their cart. Will create a font awesome cart image if Font Awesome is installed.
 - Product variants and product variant pricing is supported.
-- A Shopify theme generator is included to ensure that the transition from your Drupal site to the Shopify checkout process is seamless.
-- Handy links to edit products and other common places on Shopify right from Drupal.
+- A Shopify theme generator is included to ensure that the transition from your Backdrop site to the Shopify checkout process is seamless.
+- Handy links to edit products and other common places on Shopify right from Backdrop.
 - Drush integration to retrieve products, sync, and more.
-- Products are integrated with Drupal core search and custom view modes for search are provided.
-- Currently the module does not tie orders to Drupal users, but it's possible using the Shopify API.
+- Products are integrated with Backdrop core search and custom view modes for search are provided.
+- Currently the module does not tie orders to Backdrop users, but it's possible using the Shopify API.
 
 This module is in no way an official project of Shopify.
 
@@ -41,7 +41,7 @@ This module is in no way an official project of Shopify.
 
 ## Credits
 
- - Ported to BackdropCMS by [@docwilmot](https://github.com/docwilmot)
+ - Ported to BackdropCMS by [Laryn Kragt Bakker](https://github.com/laryn) - [CEDC.org](https://cedc.org)
  - @todo Maintainers on drupal.org include [Bonify, LLC](http://bonify.io).
 
 ## License

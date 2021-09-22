@@ -1,0 +1,6 @@
+name = Shopify API
+description = Provides a library to easily integrate with the Shopify API.
+core = 7.x
+package = Shopify
+dependencies[] = libraries
+configure = admin/config/services/shopify

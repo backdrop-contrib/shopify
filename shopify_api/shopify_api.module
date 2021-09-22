@@ -6,8 +6,8 @@
 function shopify_api_menu() {
   $items = array();
   $items['admin/config/services/shopify'] = array(
-    'title' => 'Shopify API',
-    'description' => 'Configure the Shopify API integration.',
+    'title' => 'Shopify',
+    'description' => 'Configure the Shopify integration.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('shopify_api_admin_settings'),
     'access arguments' => array('administer shopify api'),
@@ -23,20 +23,19 @@ function shopify_api_menu() {
 function shopify_api_permission() {
   $perms = array();
   $perms['administer shopify api'] = array(
-    'title' => t('Administer Shopify API'),
+    'title' => t('Administer Shopify Settings'),
   );
   return $perms;
 }
 
 /**
- * Implements hook_libraries_info().
+ * Implements hook_library_info().
  */
-function shopify_api_libraries_info() {
+function shopify_api_library_info() {
   $libraries = array();
   $libraries['shopify'] = array(
-    'name' => 'Shopify API',
-    'vendor url' => 'http://docs.shopify.com/api/libraries/php/',
-    'download url' => 'https://github.com/cmcdonaldca/ohShopify.php',
+    'name' => 'Shopify',
+    'website' => 'https://github.com/cmcdonaldca/ohShopify.php',
     'version' => '1.0',
     'files' => array(
       'php' => array(
@@ -52,7 +51,7 @@ function shopify_api_libraries_info() {
  */
 function shopify_api_config_info() {
   $prefixes['shopify_api.settings'] = array(
-    'label' => t('Shopify eCommerce settings'),
+    'label' => t('Shopify settings'),
     'group' => t('Configuration'),
   );
   return $prefixes;
@@ -66,20 +65,26 @@ function shopify_api_config_info() {
  *   NULL.
  */
 function shopify_api_client() {
-  // Load the library
-  libraries_load('shopify');
+  // Load the library.
+  $loaded = include_once(backdrop_get_path('module', 'shopify') . '/library/shopify/shopify.php');
 
-  // Mark what is required
-  $required = array('domain', 'token', 'secret', 'key');
+  if ($loaded) {
+    // Mark what is required.
+    $required = array('domain', 'token', 'secret', 'key');
 
-  // Iterate the required items and fetch the data
-  foreach ($required as $key) {
-    // If we cannot get a value, then we cannot get a client
-    if (!(${$key} = config_get('shopify_api.settings', "shopify_api_{$key}"))) {
-      return NULL;
+    // Iterate the required items and fetch the data.
+    foreach ($required as $key) {
+      // If we cannot get a value, then we cannot get a client.
+      if (!(${$key} = config_get('shopify_api.settings', "shopify_api_{$key}"))) {
+        return NULL;
+      }
     }
-  }
 
-  // Create the client
-  return new ShopifyClient($domain, $token, $key, $secret);
+    // Create the client.
+    return new ShopifyClient($domain, $token, $key, $secret);
+  }
+  else {
+    // Library did not load correctly.
+    return NULL;
+  }
 }

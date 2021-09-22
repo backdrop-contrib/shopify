@@ -1,9 +1,9 @@
 name = Shopify eCommerce
-description = Display your Shopify store within your Drupal site.
+description = Display your Shopify store within your Backdrop site.
 backdrop = 1.x
 type = module
 
-dependencies[] = entity (>=1.6)
+dependencies[] = entity
 dependencies[] = shopify_api
 dependencies[] = image
 dependencies[] = date

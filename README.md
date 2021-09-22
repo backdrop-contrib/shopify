@@ -1,17 +1,8 @@
 
-Shopify eCommerce
-+----------------------------------------------------+
-|    Maintained by Bonify, LLC  (http://bonify.io)   |
-+----------------------------------------------------+
-
-"The easiest way to do ecommerce on Drupal."
-
-Project page: https://www.drupal.org/project/shopify
-Documentation: https://www.drupal.org/node/2479703
-Demo site: http://dev-bonify-demo.pantheon.io
+# Shopify
 
 What does this module do?
-- This module provides seamless integration of Shopify with your Drupal site.
+- This module provides seamless integration of Shopify with your Backdrop site.
 - Products, images, tags and collections are synced instantly via webhooks or on demand via batches.
 - Complete webhook support for Shopify events. Listen for events in Shopify and trigger your own events in code. (Rules support coming soon.)
 - Product tags and collections are represented by customizable taxonomy terms and pages.
@@ -27,10 +18,33 @@ What does this module do?
 - Products are integrated with Drupal core search and custom view modes for search are provided.
 - Currently the module does not tie orders to Drupal users, but it's possible using the Shopify API.
 
-Dependencies
-- A Shopify subscription is required.
-- The Shopify API module (https://www.drupal.org/project/shopify_api) must be configured before this module can be installed.
-- The Shopify API library (https://github.com/cmcdonaldca/ohShopify.php) must be installed (just follow the instructions on the Shopify API module's project page).
-- Pathauto Entity (https://www.drupal.org/project/pathauto_entity) is recommended.
+This module is in no way an official project of Shopify.
 
-*** This module is the author's own work and is in no way an official project of Shopify. ***
+## Installation and Usage
+
+- Install this module using the [official Backdrop CMS instructions](https://backdropcms.org/guide/modules)
+- Usage instructions can be [viewed and edited in the Wiki](https://github.com/backdrop-contrib/shopify/wiki).
+
+## Dependencies
+
+- A Shopify subscription is required.
+- @todo Pathauto Entity (https://www.drupal.org/project/pathauto_entity) is recommended.
+
+## Issues
+
+ - Bugs and Feature requests should be reported in the [Issue Queue](https://github.com/backdrop-contrib/shopify/issues).
+
+## Current Maintainers
+
+ - [Laryn Kragt Bakker](https://github.com/laryn) - [CEDC.org](https://cedc.org)
+ - Collaboration and co-maintainers welcome!
+
+## Credits
+
+ - Ported to BackdropCMS by [@docwilmot](https://github.com/docwilmot)
+ - @todo Maintainers on drupal.org include [Bonify, LLC](http://bonify.io).
+
+## License
+
+This project is GPL v2 software. See the LICENSE.txt file in this directory for
+complete text.

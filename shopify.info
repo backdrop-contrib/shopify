@@ -12,6 +12,7 @@ dependencies[] = taxonomy
 dependencies[] = number
 
 scripts[] = shopify.js
+stylesheets[all][] = css/shopify.css
 
 package = Shopify
 

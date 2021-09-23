@@ -1,0 +1,15 @@
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-shopify {
+  padding-left: 0;
+}
+
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-shopify::before {
+  mask-image: url("../images/shopify-brands.svg");
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+  margin: 0 6px;
+  background: currentColor;
+  mask-size: cover;
+}

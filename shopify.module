@@ -47,7 +47,7 @@ function shopify_views_api() {
  * Imports views from the /views directory.
  */
 function shopify_views_default_views() {
-  $path = . '/views/*.view.inc';
+  $path = backdrop_get_path('module', 'shopify') . '/views/*.view.inc';
   $views = array();
   foreach (glob($path) as $views_filename) {
     $view = FALSE;
@@ -460,6 +460,7 @@ function shopify_sync_products(array $options = array()) {
 function shopify_sync_collections(array $options = array()) {
   $collections = shopify_api_get_collections($options);
   foreach ($collections as $collection) {
+    dpm($collection);
     $term = shopify_collection_load($collection['id']);
     if (!$term) {
       // Need to create a new collection.
@@ -490,7 +491,7 @@ function shopify_sync_deleted_collections(array $options = array()) {
   for ($page = 1; $page <= ceil($collections_count / $options['limit']); $page++) {
 
     // Setup default options for the products API call.
-    $options['page'] = $page;
+    $options['page_info'] = $page;
     $options['fields'] = 'id';
 
     // Build a list of all products in the Shopify system.
@@ -499,15 +500,15 @@ function shopify_sync_deleted_collections(array $options = array()) {
 
   // Format result set as an array of product and variant IDs.
   $collection_ids = array();
-  array_walk_recursive($collections, ($c) (&$collection_ids){
-    $collection_ids[] = $c
+  array_walk_recursive($collections, function ($c) use (&$collection_ids) {
+    $collection_ids[] = $c;
   });
 
   $count = 0;
 
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'taxonomy_term');
-  $query->propertyCondition('vid', shopify_collection_vocabulary()->vid);
+  $query->propertyCondition('vocabulary', 'shopify_collections');
   if ($collection_ids) {
     $query->fieldCondition('shopify_collection_id', 'value', $collection_ids, 'NOT IN');
   }
@@ -541,7 +542,7 @@ function shopify_sync_deleted_products(array $options = array()) {
   for ($page = 1; $page <= ceil($product_count / $options['limit']); $page++) {
 
     // Setup default options for the products API call.
-    $options['page'] = $page;
+    $options['page_info'] = $page;
     $options['fields'] = 'id,variants';
 
     // Build a list of all products in the Shopify system.
@@ -752,10 +753,10 @@ function shopify_collection_update($collection, $sync_products = FALSE) {
  *   Whether or not to sync product information during creation.
  */
 function shopify_collection_create($collection, $sync_products = FALSE) {
-  $vocab = shopify_collection_vocabulary();
+  $vocab = 'shopify_collections';
   $date = strtotime($collection['published_at']);
   $term = entity_create('taxonomy_term', array(
-    'vid' => $vocab->vid,
+    'vocabulary' => $vocab,
     'name' => $collection['title'],
     'description' => $collection['body_html'],
     'shopify_collection_id' => array('und' => array(array('value' => $collection['id']))),
@@ -843,13 +844,6 @@ function shopify_collection_delete($collection_id) {
 }
 
 /**
- * Gets the Shopify collections vocabulary.
- */
-function shopify_collection_vocabulary() {
-  return taxonomy_vocabulary_machine_name_load('shopify_collections');
-}
-
-/**
  * Loads a collection.
  *
  * @param int $collection_id
@@ -883,10 +877,10 @@ function shopify_delete_all_products() {
  * Delete all Shopify collections.
  */
 function shopify_delete_all_collections() {
-  $vocab = taxonomy_vocabulary_machine_name_load('shopify_collections');
+  $vocab = 'shopify_collections';
   $tids = db_select('taxonomy_term_data', 'ttd')
     ->fields('ttd', array('tid'))
-    ->condition('vid', $vocab->vid)
+    ->condition('vocabulary', $vocab)
     ->execute()->fetchAllAssoc('tid');
   if ($tids) {
     entity_delete_multiple('taxonomy_term', array_keys($tids));
@@ -1795,6 +1789,7 @@ function shopify_ctools_plugin_api($owner, $api) {
  */
 function shopify_autoload_info() {
   return array(
+    'ShopifyEntityDefaultUIController' => 'includes/shopify.entity.ui.inc',
     'ShopifyProduct' => 'includes/shopify.entity.inc',
     'ShopifyProductController' => 'includes/shopify.entity.inc',
     'ShopifyProductMetadataController' => 'includes/shopify.entity.inc',

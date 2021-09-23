@@ -253,7 +253,7 @@ function shopify_admin_page() {
   // Get count of collections in the site.
   $collection_count = db_select('taxonomy_term_data', 'ttd')
     ->fields('ttd')
-    ->condition('vid', shopify_collection_vocabulary()->vid)
+    ->condition('vocabulary', 'shopify_collections')
     ->execute()->rowCount();
 
   if (!$collection_count) {
@@ -629,7 +629,7 @@ function shopify_sync_products_deleted_batch_op(&$context) {
 function shopify_sync_products_batch_op($page, $num_per_batch, $operation_details, &$context) {
   $products = shopify_api_get_products(
     array(
-    'page' => $page,
+    'page_info' => $page,
     'limit' => $num_per_batch,
     'updated_at_min' => config_get('shopify.settings', 'shopify_last_product_sync'),
   )

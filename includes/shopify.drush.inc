@@ -54,7 +54,7 @@ function shopify_drush_command() {
       'drush shopify-api get products' => 'Get products from the API',
       'drush shopify-api get shop' => 'Get shop info from the API',
       'drush shopify-api get shop --options="fields=domain"' => 'Get your shop domain',
-      'drush shopify-api get products --options="limit=5&page=2"' => 'Get 5 products from the second page from the API',
+      'drush shopify-api get products --options="limit=5&page_info=2"' => 'Get 5 products from the second page from the API',
       'drush shopify-api get product/5/variants --options="fields=variant_id,title"' => 'Get variants for product #5 and only return specific fields.',
       'drush shopify-api delete product/5' => 'Delete product #5',
       'drush shopify-api post products --options=\'{"product":{"title":"test this out"}}\'' => 'Create a new product by passing JSON',

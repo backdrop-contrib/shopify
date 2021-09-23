@@ -8,6 +8,38 @@
  * Class ShopifyProduct
  */
 class ShopifyProduct extends Entity {
+  public $id;
+
+  /**
+   * Implements EntityInterface::id().
+   */
+  public function id() {
+    return $this->id;
+  }
+
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'shopify_product';
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return 'label';
+  }
+
+  /**
+   * Implements EntityInterface::uri().
+   */
+  public function uri() {
+    return array(
+      'path' => 'shopify_product/' . $this->id,
+    );
+  }
+
 
   /**
    * The name of the product.
@@ -366,10 +398,10 @@ class ShopifyProduct extends Entity {
           $tid = reset($term)->tid;
         }
         else {
-          $vocab = taxonomy_vocabulary_machine_name_load('shopify_tags');
+          $vocab = 'shopify_tags';
           $term = new stdClass();
           $term->name = $tag;
-          $term->vid = $vocab->vid;
+          $term->vocabulary = $vocab;
           taxonomy_term_save($term);
           $tid = $term->tid;
         }
@@ -420,10 +452,10 @@ class ShopifyProduct extends Entity {
 /**
  * Class ShopifyProductController
  */
-class ShopifyProductController extends EntityAPIController {
+class ShopifyProductController extends EntityPlusController {
 
   /**
-   * Implements EntityAPIControllerInterface.
+   * Implements EntityPlusControllerInterface.
    */
   public function view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
     // Don't let someone view a specific variant page.
@@ -685,7 +717,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
 /**
  * Class ShopifyProductsUIController
  */
-class ShopifyProductsUIController extends EntityDefaultUIController {
+class ShopifyProductsUIController extends ShopifyEntityDefaultUIController {
 
   /**
    * Builds the entity overview form.
@@ -824,7 +856,7 @@ class ShopifyProductsUIController extends EntityDefaultUIController {
 /**
  * Class ShopifyProductViewsController
  */
-class ShopifyProductViewsController extends EntityDefaultViewsController {
+class ShopifyProductViewsController extends EntityPlusDefaultViewsController {
 
   /**
    * Defines the result for hook_views_data().

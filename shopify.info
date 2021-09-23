@@ -3,7 +3,7 @@ description = Display your Shopify store within your Backdrop site.
 backdrop = 1.x
 type = module
 
-dependencies[] = entity
+dependencies[] = entity_plus
 dependencies[] = shopify_api
 dependencies[] = image
 dependencies[] = date

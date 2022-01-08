@@ -57,7 +57,7 @@ function shopify_requirements($phase) {
     catch (Exception $e) {
       $requirements['shopify_ecommerce'] = array(
         'title' => $t('Shopify eCommerce'),
-        'description' => $t('Cannot connect your credentials to the Shopify API. Do you have a <a href="@shopify_website">Shopify Account</a>? <a href="@shopif_api">Are your API settings correct</a>?', array(
+        'description' => $t('Cannot connect your credentials to the Shopify API. Do you have a <a href="@shopify_website">Shopify Account</a>? <a href="@shopify_api">Are your API settings correct</a>?', array(
           '@shopify_website' => 'https://www.shopify.com/?ref=bonify',
           '@shopify_api' => url('admin/config/services/shopify'),
         )),

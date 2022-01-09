@@ -6,10 +6,10 @@
     "shopify_cron_sync_products": "",
     "shopify_cron_sync_collections": "",
     "shopify_cron_sync_time": "0",
-    "shopify_last_registered_host": "dynamic value in file /shopify/includes/shopify.admin.inc line 839",
+    "shopify_last_registered_host": "",
     "shopify_webhooks_debug": false,
     "shopify_api_next_timeout": "0",
-    "shopify_api_call_timeout": "SHOPIFY_API_CALL_TIMEOUT",
+    "shopify_api_call_timeout": "500",
     "shopify_api_call_timeout_multiplier": "4",
     "shopify_download_images_using_curl": false,
     "shopify_store_info": []

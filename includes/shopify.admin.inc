@@ -841,13 +841,16 @@ function shopify_webhooks_admin($form, &$form_state) {
     }
   }
 
-  $protocol = stripos($_SERVER['SERVER_PROTOCOL'], 'https') === TRUE ? 'https://' : 'http://';
-  $current = $protocol . "$_SERVER [HTTP_HOST]";
+  $last_host = $config->get('last_registered_host');
+  if (empty($last_host)) {
+    $protocol = "$_SERVER[REQUEST_SCHEME]://";
+    $last_host = $protocol . "$_SERVER[HTTP_HOST]";
+  }
 
   $form['register']['hostname'] = array(
     '#type' => 'textfield',
     '#title' => t('Hostname'),
-    '#default_value' => $config->get('last_registered_host'),
+    '#default_value' => $last_host,
     '#size' => 60,
     '#required' => TRUE,
     '#description' => t('Do not include a trailing slash.'),

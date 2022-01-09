@@ -1,7 +1,0 @@
-{
-    "_config_name": "shopify_api.settings",
-    "shopify_api_domain": "",
-    "shopify_api_token": "",
-    "shopify_api_key": "dynamic variable in file /shopify/shopify_api/shopify_api.module line 67",
-    "shopify_api_secret": ""
-}

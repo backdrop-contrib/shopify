@@ -2,9 +2,9 @@ name = Shopify eCommerce
 description = Display your Shopify store within your Backdrop site.
 backdrop = 1.x
 type = module
+configure = admin/shopify/api
 
 dependencies[] = entity_plus
-dependencies[] = shopify_api
 dependencies[] = image
 dependencies[] = date
 dependencies[] = views
@@ -15,4 +15,5 @@ scripts[] = shopify.js
 stylesheets[all][] = css/shopify.css
 
 package = Shopify
+tags = ecommerce
 

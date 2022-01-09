@@ -116,7 +116,7 @@ function shopify_admin_theme_download_submit($form, $form_state) {
     // Try to upload this zip file for the user.
     try {
       // Create a secure URL.
-      $sig = hash_hmac('sha256', REQUEST_TIME . 'default_shopify_theme.zip', config_get('shopify.settings', 'shopify_api_secret'));
+      $sig = hash_hmac('sha256', REQUEST_TIME . 'default_shopify_theme.zip', config_get('shopify.settings', 'api_secret'));
       shopify_api_call('POST', 'themes', array(
         'theme' => array(
           'name' => 'Backdrop Shopify Theme',
@@ -234,7 +234,7 @@ function shopify_admin_page() {
     return t('<ul><li>Do you have a <a target="_blank" href="@signup">Shopify account</a>?</li><li>If you have an account you\'ll need to create your API key if you haven\'t already. See <a target="_blank" href="@api_key">https://docs.shopify.com/support/configuration/apps/where-do-i-find-my-api-key</a> for more information.</li><li>Have you checked your <a href="@api_config">API settings to make sure they match?</a></li><li><a href="@status_page">Can your server make outgoing HTTP requests?</li></ul>', array(
       '@signup' => url('https://www.shopify.com/?ref=bonify'),
       '@api_key' => url('https://docs.shopify.com/support/configuration/apps/where-do-i-find-my-api-key'),
-      '@api_config' => url('admin/config/services/shopify'),
+      '@api_config' => url('admin/shopify/api'),
       '@status_page' => url('/admin/reports/status'),
     ));
   }
@@ -294,7 +294,7 @@ function shopify_admin_sync_form($form, &$form_state) {
     return array();
   }
 
-  $last_updated = $config->get('shopify_last_product_sync');
+  $last_updated = $config->get('last_product_sync');
   if ($last_updated == '1970-01-01 00:00' || !$last_updated) {
     $last_updated = 'never';
   }
@@ -339,7 +339,7 @@ function shopify_admin_sync_form($form, &$form_state) {
     '#submit' => array('shopify_admin_product_sync_form_submit'),
   );
 
-  $last_updated = $config->get('shopify_last_collection_sync');
+  $last_updated = $config->get('last_collection_sync');
   if ($last_updated == '1970-01-01 00:00' || !$last_updated) {
     $last_updated = 'never';
   }
@@ -374,18 +374,18 @@ function shopify_admin_sync_form($form, &$form_state) {
   $form['cron']['sync_products'] = array(
     '#type' => 'checkbox',
     '#title' => t('Sync Products on cron run.'),
-    '#default_value' => $config->get('shopify_cron_sync_products'),
+    '#default_value' => $config->get('cron_sync_products'),
   );
   $form['cron']['sync_collections'] = array(
     '#type' => 'checkbox',
     '#title' => t('Sync Collections on cron run.'),
-    '#default_value' => $config->get('shopify_cron_sync_collections'),
+    '#default_value' => $config->get('cron_sync_collections'),
   );
   $form['cron']['sync_time'] = array(
     '#type' => 'textfield',
     '#title' => t('How often to sync'),
     '#description' => t('Enter the number of seconds to wait to sync between cron runs.<br />To sync once per day, enter "86400". To sync once per hour, enter "3600".<br />Leave empty or "0" to sync on every cron run.'),
-    '#default_value' => $config->get('shopify_cron_sync_time'),
+    '#default_value' => $config->get('cron_sync_time'),
   );
   $form['cron']['save_cron'] = array(
     '#type' => 'submit',
@@ -438,9 +438,9 @@ function shopify_admin_delete_orphaned_tags_form_submit($form, &$form_state) {
  */
 function shopify_admin_cron_sync_form_submit($form, $form_state) {
   $v = $form_state['values'];
-  config_set('shopify.settings', 'shopify_cron_sync_products', $v['cron']['sync_products']);
-  config_set('shopify.settings', 'shopify_cron_sync_collections', $v['cron']['sync_collections']);
-  config_set('shopify.settings', 'shopify_cron_sync_time', $v['cron']['sync_time']);
+  config_set('shopify.settings', 'cron_sync_products', $v['cron']['sync_products']);
+  config_set('shopify.settings', 'cron_sync_collections', $v['cron']['sync_collections']);
+  config_set('shopify.settings', 'cron_sync_time', $v['cron']['sync_time']);
 }
 
 /**
@@ -518,7 +518,7 @@ function shopify_sync_collections_batch_finished($success, $results, $operations
     backdrop_set_message(t('Processed @count collections.', array('@count' => count($results))));
     $datetime = new DateTime();
     $last_updated = $datetime->format('Y-m-d H:i');
-    config_set('shopify.settings', 'shopify_last_collection_sync', $last_updated);
+    config_set('shopify.settings', 'last_collection_sync', $last_updated);
   }
   else {
     // An error occurred.
@@ -564,7 +564,7 @@ function shopify_sync_products_batch($params) {
   // Get count of products
   $num_products = shopify_api_get_product_count(
     array(
-    'updated_at_min' => config_get('shopify.settings', 'shopify_last_product_sync'),
+    'updated_at_min' => config_get('shopify.settings', 'last_product_sync'),
   )
   );
   $num_operations = ceil($num_products / $params['num_per_batch']);
@@ -631,7 +631,7 @@ function shopify_sync_products_batch_op($page, $num_per_batch, $operation_detail
     array(
     'page_info' => $page,
     'limit' => $num_per_batch,
-    'updated_at_min' => config_get('shopify.settings', 'shopify_last_product_sync'),
+    'updated_at_min' => config_get('shopify.settings', 'last_product_sync'),
   )
   );
   foreach ($products as $product) {
@@ -659,7 +659,7 @@ function shopify_sync_products_batch_finished($success, $results, $operations) {
     backdrop_set_message(t('Processed @count products and variants.', array('@count' => count($results))));
     $datetime = new DateTime();
     $last_updated = $datetime->format('Y-m-d H:i');
-    config_set('shopify.settings', 'shopify_last_product_sync', $last_updated);
+    config_set('shopify.settings', 'last_product_sync', $last_updated);
   }
   else {
     // An error occurred.
@@ -847,7 +847,7 @@ function shopify_webhooks_admin($form, &$form_state) {
   $form['register']['hostname'] = array(
     '#type' => 'textfield',
     '#title' => t('Hostname'),
-    '#default_value' => $config->get('shopify_last_registered_host'),
+    '#default_value' => $config->get('last_registered_host'),
     '#size' => 60,
     '#required' => TRUE,
     '#description' => t('Do not include a trailing slash.'),
@@ -856,7 +856,7 @@ function shopify_webhooks_admin($form, &$form_state) {
   $form['debug'] = array(
     '#type' => 'checkbox',
     '#title' => t('Debug webhooks in watchdog'),
-    '#default_value' => $config->get('shopify_webhooks_debug'),
+    '#default_value' => $config->get('webhooks_debug'),
   );
 
   $form['save'] = array(
@@ -899,8 +899,8 @@ function shopify_register_webhooks_validate($form, &$form_state) {
 function shopify_register_webhooks_submit($form, &$form_state) {
   $values = $form_state['values'];
 
-  config_set('shopify.settings', 'shopify_webhooks_debug', $values['debug']);
-  config_set('shopify.settings', 'shopify_last_registered_host', $values['register']['hostname']);
+  config_set('shopify.settings', 'webhooks_debug', $values['debug']);
+  config_set('shopify.settings', 'last_registered_host', $values['register']['hostname']);
 
   if ($form_state['values']['op'] == t('Save')) {
 

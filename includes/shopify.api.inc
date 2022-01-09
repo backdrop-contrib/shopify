@@ -8,6 +8,38 @@
 define('SHOPIFY_API_CALL_TIMEOUT', 500);
 
 /**
+ * Create a Shopify API client class.
+ *
+ * @return
+ *   A ShopifyClient class if all connection settings are present, otherwise
+ *   NULL.
+ */
+function shopify_api_get_client() {
+  // Load the library.
+  $loaded = include_once(backdrop_get_path('module', 'shopify') . '/library/shopify/shopify.php');
+
+  if ($loaded) {
+    // Mark what is required.
+    $required = array('domain', 'token', 'secret', 'key');
+
+    // Iterate the required items and fetch the data.
+    foreach ($required as $key) {
+      // If we cannot get a value, then we cannot get a client.
+      if (!(${$key} = config_get('shopify.settings', "api_{$key}"))) {
+        return NULL;
+      }
+    }
+
+    // Create the client.
+    return new ShopifyClient($domain, $token, $key, $secret);
+  }
+  else {
+    // Library did not load correctly.
+    return NULL;
+  }
+}
+
+/**
  * Perform an API call to Shopify.
  *
  * @param string $method
@@ -23,18 +55,18 @@ define('SHOPIFY_API_CALL_TIMEOUT', 500);
  * @throws \ShopifyApiException
  */
 function shopify_api_call($method, $path, array $options = array()) {
-  if ($timeout = config_get('shopify.settings', 'shopify_api_next_timeout')) {
+  if ($timeout = config_get('shopify.settings', 'api_next_timeout')) {
     // Sleep for a while to let the bucket empty out a bit.
     usleep($timeout * 1000);
-    config_set('shopify.settings', 'shopify_api_next_timeout', 0);
+    config_set('shopify.settings', 'api_next_timeout', 0);
   }
-  $client = shopify_api_client();
+  $client = shopify_api_get_client();
   if (!$client instanceof ShopifyClient) {
-    throw new Exception('Unable to create ShopifyClient. Check your Shopify API credentials at /admin/config/services/shopify');
+    throw new Exception('Unable to create ShopifyClient. Check your Shopify API credentials at /admin/shopify/api');
   }
   $result = $client->call($method, '/admin/' . $path . '.json', $options);
   if (shopify_api_call_limit_reached($client)) {
-    config_set('shopify.settings', 'shopify_api_next_timeout', shopify_api_get_next_timeout());
+    config_set('shopify.settings', 'api_next_timeout', shopify_api_get_next_timeout());
   }
   return $result;
 }
@@ -51,7 +83,7 @@ function shopify_api_call($method, $path, array $options = array()) {
  */
 function shopify_api_get_next_timeout() {
   $config = config('shopify.settings');
-  return $config->get('shopify_api_call_timeout') * rand(1, $config->get('shopify_api_call_timeout_multiplier'));
+  return $config->get('api_call_timeout') * rand(1, $config->get('api_call_timeout_multiplier'));
 }
 
 /**
@@ -91,7 +123,7 @@ function shopify_api_get_shop_info($refresh = FALSE) {
   $info = (array) shopify_store_info();
   if ($refresh == TRUE || empty($info)) {
     $info = shopify_api_call('GET', 'shop');
-    config_set('shopify.settings', 'shopify_store_info', $info);
+    config_set('shopify.settings', 'store_info', $info);
   }
   return (object) $info;
 }

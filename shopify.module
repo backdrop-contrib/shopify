@@ -6,6 +6,7 @@
 
 // Load include files.
 module_load_include('inc', 'shopify', 'includes/shopify.api');
+module_load_include('inc', 'shopify', 'includes/shopify.api.admin');
 module_load_include('inc', 'shopify', 'includes/shopify.webhooks');
 module_load_include('inc', 'shopify', 'includes/shopify.search');
 module_load_include('inc', 'shopify', 'includes/shopify.metatag');
@@ -292,6 +293,15 @@ function shopify_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/shopify.admin.inc',
   );
+  $items['admin/shopify/api'] = array(
+    'title' => 'API',
+    'description' => 'Configure the Shopify API integration.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('shopify_api_admin_settings'),
+    'access arguments' => array('administer shopify'),
+    'file' => 'includes/shopify.api.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
 
   $items['shopify/redirect'] = array(
     'page callback' => 'shopify_redirect',
@@ -374,10 +384,28 @@ function shopify_theme_download($filename) {
  */
 function shopify_config_info() {
   $prefixes['shopify.settings'] = array(
-    'label' => t('Shopify eCommerce settings'),
+    'label' => t('Shopify settings'),
     'group' => t('Configuration'),
   );
   return $prefixes;
+}
+
+/**
+ * Implements hook_library_info().
+ */
+function shopify_library_info() {
+  $libraries = array();
+  $libraries['shopify'] = array(
+    'name' => 'Shopify',
+    'website' => 'https://github.com/cmcdonaldca/ohShopify.php',
+    'version' => '1.0',
+    'files' => array(
+      'php' => array(
+        'shopify.php',
+      ),
+    ),
+  );
+  return $libraries;
 }
 
 /**
@@ -394,7 +422,7 @@ function shopify_config_info() {
  *   Returns TRUE if the user can access the callback.
  */
 function shopify_theme_download_access($timestamp, $sig, $filename) {
-  $compare = hash_hmac('sha256', $timestamp . 'default_shopify_theme.zip', config_get('shopify.settings', 'shopify_api_secret'));
+  $compare = hash_hmac('sha256', $timestamp . 'default_shopify_theme.zip', config_get('shopify.settings', 'api_secret'));
   if ($compare !== $sig) {
     // Someone doesn't have the right sig here.
     return FALSE;
@@ -412,21 +440,21 @@ function shopify_theme_download_access($timestamp, $sig, $filename) {
 function shopify_cron() {
   $config = config('shopify.settings');
   // Check last cron run time vs. the cron speed setting.
-  if (state_get('cron_last') + $config->get('shopify_cron_sync_time') > REQUEST_TIME) {
+  if (state_get('cron_last') + $config->get('cron_sync_time') > REQUEST_TIME) {
     // No need to sync yet.
     return FALSE;
   }
-  if ($config->get('shopify_cron_sync_products')) {
+  if ($config->get('cron_sync_products')) {
     // Sync products.
     shopify_sync_products(array(
-      'updated_at_min' => $config->get('shopify_last_product_sync'),
+      'updated_at_min' => $config->get('last_product_sync'),
       'limit' => 250,
     ));
   }
-  if ($config->get('shopify_cron_sync_collections')) {
+  if ($config->get('cron_sync_collections')) {
     // Sync collections.
     shopify_sync_collections(array(
-      'updated_at_min' => $config->get('shopify_last_collection_sync'),
+      'updated_at_min' => $config->get('last_collection_sync'),
       'limit' => 250,
     ));
   }
@@ -601,7 +629,7 @@ function shopify_webhook_access() {
   }
   $data = file_get_contents('php://input');
   // Compare their hmac to our own that we calculate.
-  return $_SERVER['HTTP_X_SHOPIFY_HMAC_SHA256'] === base64_encode(hash_hmac('sha256', $data, config_get('shopify.settings', 'shopify_api_secret'), TRUE));
+  return $_SERVER['HTTP_X_SHOPIFY_HMAC_SHA256'] === base64_encode(hash_hmac('sha256', $data, config_get('shopify.settings', 'api_secret'), TRUE));
 }
 
 /**
@@ -1245,7 +1273,7 @@ function shopify_money_format() {
  *   Object of store information.
  */
 function shopify_store_info() {
-  return (object) config_get('shopify.settings', 'shopify_store_info');
+  return (object) config_get('shopify.settings', 'store_info');
 }
 
 /**
@@ -1692,7 +1720,7 @@ _HTML
 function shopify_products_reset_sync_datestamp() {
   $datetime = new DateTime('1/1/1970');
   $last_updated = $datetime->format('Y-m-d H:i');
-  config_set('shopify.settings', 'shopify_last_product_sync', $last_updated);
+  config_set('shopify.settings', 'last_product_sync', $last_updated);
 }
 
 /**
@@ -1701,7 +1729,7 @@ function shopify_products_reset_sync_datestamp() {
 function shopify_collections_reset_sync_datestamp() {
   $datetime = new DateTime('1/1/1970');
   $last_updated = $datetime->format('Y-m-d H:i');
-  config_set('shopify.settings', 'shopify_last_collection_sync', $last_updated);
+  config_set('shopify.settings', 'last_collection_sync', $last_updated);
 }
 
 /**

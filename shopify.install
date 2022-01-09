@@ -8,9 +8,10 @@
  * Implements hook_requirements().
  */
 function shopify_requirements($phase) {
+  backdrop_load('module', 'shopify');
+  $requirements = array();
   $t = get_t();
   if ($phase == 'install') {
-
     // Check if we're running a 64-bit version of PHP.
     if (PHP_INT_SIZE === 4) {
       $requirements['shopify_ecommerce'] = array(
@@ -20,28 +21,16 @@ function shopify_requirements($phase) {
       );
       return $requirements;
     }
-
-    module_load_install('shopify_api');
-    $api_requirements = shopify_api_requirements('runtime');
-    $requirements = array_merge($api_requirements);
-    // Shopify library not installed.
-    if ($requirements['shopify']['severity'] != REQUIREMENT_OK) {
-      $requirements['shopify_ecommerce'] = array(
-        'title' => $t('Shopify eCommerce'),
-        'description' => $t('Unable to install Shopify eCommerce. Shopify API library not installed. Check the help section at <a href="@shopify_api_config">/admin/config/services/shopify</a>.', array('@shopify_api_config' => url('admin/config/services/shopify'))),
-        'severity' => REQUIREMENT_ERROR,
-      );
-      return $requirements;
-    }
-
+  }
+  elseif ($phase == 'runtime') {
     // No credentials provided for Shopify API.
-    $client = shopify_api_client();
+    $client = shopify_api_get_client();
     if (!$client instanceof ShopifyClient) {
       $requirements['shopify_ecommerce'] = array(
         'title' => $t('Shopify eCommerce'),
-        'description' => $t('Unable to install Shopify eCommerce. Do you have a <a href="@shopify_website">Shopify Account</a>? If so, make sure you\'ve entered your API credentials at <a href="@shopify_api_config">/admin/config/services/shopify</a>', array(
+        'description' => $t('Unable to install Shopify eCommerce. Do you have a <a href="@shopify_website">Shopify Account</a>? If so, make sure you\'ve entered your API credentials at <a href="@shopify_api_config">/admin/shopify/api</a>', array(
           '@shopify_website' => 'https://www.shopify.com/?ref=bonify',
-          '@shopify_api_config' => url('admin/config/services/shopify'),
+          '@shopify_api_config' => url('admin/shopify/api'),
         )),
         'severity' => REQUIREMENT_ERROR,
       );
@@ -49,23 +38,30 @@ function shopify_requirements($phase) {
     }
     // Attempt to connect and get basic store information.
     try {
-      $client = shopify_api_client();
+      $client = shopify_api_get_client();
       if ($client) {
         $client->call('GET', '/admin/shop.json');
+        $requirements[$key] = array(
+          'title' => t('Shopify'),
+          'value' => t('API credentials connect successfully.'),
+          'severity' => REQUIREMENT_OK,
+        );
       }
     }
     catch (Exception $e) {
       $requirements['shopify_ecommerce'] = array(
         'title' => $t('Shopify eCommerce'),
-        'description' => $t('Cannot connect your credentials to the Shopify API. Do you have a <a href="@shopify_website">Shopify Account</a>? <a href="@shopify_api">Are your API settings correct</a>?', array(
+        'description' => $t('Cannot connect your credentials to the Shopify API. Do you have a <a href="@shopify_website">Shopify Account</a>? <a href="@shopify_api_config">Are your API settings correct</a>?', array(
           '@shopify_website' => 'https://www.shopify.com/?ref=bonify',
-          '@shopify_api' => url('admin/config/services/shopify'),
+          '@shopify_api_config' => url('admin/shopify/api'),
         )),
         'severity' => REQUIREMENT_ERROR,
       );
       return $requirements;
     }
   }
+
+  return $requirements;
 }
 
 /**
@@ -231,9 +227,9 @@ function shopify_install() {
   shopify_products_reset_sync_datestamp();
 
   // Set the shop info on install.
-  $client = shopify_api_client();
+  $client = shopify_api_get_client();
   $info = $client->call('GET', '/admin/shop.json');
-  config_set('shopify.settings', 'shopify_store_info', $info);
+  config_set('shopify.settings', 'store_info', $info);
 
 //  Create Shopify Tags vocabulary
   $vocabulary = new TaxonomyVocabulary();
@@ -663,21 +659,32 @@ function shopify_update_last_removed() {
  */
 function shopify_update_1000() {
   $config = config('shopify.settings');
-  $config->set('shopify_api_secret', update_variable_get('shopify_api_secret', ''));
-  $config->set('shopify_last_product_sync', update_variable_get('shopify_last_product_sync', ''));
-  $config->set('shopify_last_collection_sync', update_variable_get('shopify_last_collection_sync', ''));
-  $config->set('shopify_cron_sync_products', update_variable_get('shopify_cron_sync_products', ''));
-  $config->set('shopify_cron_sync_collections', update_variable_get('shopify_cron_sync_collections', ''));
-  $config->set('shopify_cron_sync_time', update_variable_get('shopify_cron_sync_time', '0'));
-  $config->set('shopify_last_registered_host', update_variable_get('shopify_last_registered_host', 'dynamic value in file /shopify/includes/shopify.admin.inc line 839'));
-  $config->set('shopify_webhooks_debug', update_variable_get('shopify_webhooks_debug', array()));
-  $config->set('shopify_api_next_timeout', update_variable_get('shopify_api_next_timeout', '0'));
-  $config->set('shopify_api_call_timeout', update_variable_get('shopify_api_call_timeout', 'SHOPIFY_API_CALL_TIMEOUT'));
-  $config->set('shopify_api_call_timeout_multiplier', update_variable_get('shopify_api_call_timeout_multiplier', '4'));
-  $config->set('shopify_download_images_using_curl', update_variable_get('shopify_download_images_using_curl', array()));
-  $config->set('shopify_store_info', update_variable_get('shopify_store_info', array()));
+
+  // Migrate variables from Shopify API module.
+  $config->set('api_domain', update_variable_get('shopify_api_domain', ''));
+  $config->set('api_token', update_variable_get('shopify_api_token', ''));
+  $config->set('api_key', update_variable_get('shopify_api_key', ''));
+  $config->set('api_secret', update_variable_get('shopify_api_secret', ''));
+
+  // Migrate variables from Shopify module.
+  $config->set('last_product_sync', update_variable_get('shopify_last_product_sync', ''));
+  $config->set('last_collection_sync', update_variable_get('shopify_last_collection_sync', ''));
+  $config->set('cron_sync_products', update_variable_get('shopify_cron_sync_products', ''));
+  $config->set('cron_sync_collections', update_variable_get('shopify_cron_sync_collections', ''));
+  $config->set('cron_sync_time', update_variable_get('shopify_cron_sync_time', '0'));
+  $config->set('last_registered_host', update_variable_get('shopify_last_registered_host', ''));
+  $config->set('webhooks_debug', update_variable_get('shopify_webhooks_debug', array()));
+  $config->set('api_next_timeout', update_variable_get('shopify_api_next_timeout', '0'));
+  $config->set('api_call_timeout', update_variable_get('shopify_api_call_timeout', 'API_CALL_TIMEOUT'));
+  $config->set('api_call_timeout_multiplier', update_variable_get('shopify_api_call_timeout_multiplier', '4'));
+  $config->set('download_images_using_curl', update_variable_get('shopify_download_images_using_curl', array()));
+  $config->set('store_info', update_variable_get('shopify_store_info', array()));
   $config->save();
 
+  update_variable_del('shopify_api_domain');
+  update_variable_del('shopify_api_token');
+  update_variable_del('shopify_api_key');
+  update_variable_del('shopify_api_secret');
   update_variable_del('shopify_api_secret');
   update_variable_del('shopify_last_product_sync');
   update_variable_del('shopify_last_collection_sync');

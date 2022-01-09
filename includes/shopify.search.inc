@@ -97,7 +97,7 @@ function _shopify_index_product($product) {
 
   // Save the changed time of the most recent indexed product, for the search
   // results half-life calculation.
-  config_set('shopify.settings', 'shopify_cron_last', $product->updated_at);
+  config_set('shopify.settings', 'cron_last', $product->updated_at);
 
   // Render the product.
   $build = entity_view('shopify_product', array($product), 'search_index');

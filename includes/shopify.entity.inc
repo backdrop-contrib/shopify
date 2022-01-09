@@ -362,7 +362,7 @@ class ShopifyProduct extends Entity {
    * @return bool|mixed|\stdClass
    */
   function downloadImage($product_image, $directory) {
-    if (config_get('shopify.settings', 'shopify_download_images_using_curl') && extension_loaded('curl') === TRUE) {
+    if (config_get('shopify.settings', 'download_images_using_curl') && extension_loaded('curl') === TRUE) {
       $curl = curl_init();
       curl_setopt_array($curl, array(
         CURLOPT_FAILONERROR => 1,

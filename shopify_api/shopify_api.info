@@ -1,7 +1,0 @@
-name = Shopify API
-description = Provides a library to easily integrate with the Shopify API.
-backdrop = 1.x
-type = module
-package = Shopify
-
-configure = admin/config/services/shopify

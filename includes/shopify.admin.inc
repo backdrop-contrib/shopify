@@ -569,13 +569,13 @@ function shopify_sync_products_batch($params) {
   );
   $num_operations = ceil($num_products / $params['num_per_batch']);
   $operations = array();
-  for ($page = 1; $page <= $num_operations; $page++) {
+  for ($pagenum = 1; $pagenum <= $num_operations; $pagenum++) {
     $operations[] = array(
       'shopify_sync_products_batch_op',
       array(
-        $page,
+        $pagenum,
         $params['num_per_batch'],
-        t('(Processing page @operation)', array('@operation' => $page)),
+        t('(Processing page @operation)', array('@operation' => $pagenum)),
       ),
     );
   }
@@ -626,27 +626,30 @@ function shopify_sync_products_deleted_batch_op(&$context) {
 /**
  * Shopify products sync batch operation handler.
  */
-function shopify_sync_products_batch_op($page, $num_per_batch, $operation_details, &$context) {
+function shopify_sync_products_batch_op($pagenum, $num_per_batch, $operation_details, &$context) {
   $products = shopify_api_get_products(
     array(
-    'page_info' => $page,
-    'limit' => $num_per_batch,
-    'updated_at_min' => config_get('shopify.settings', 'last_product_sync'),
-  )
+      'page_info' => $context['link'],
+      'limit' => $num_per_batch,
+      'updated_at_min' => config_get('shopify.settings', 'last_product_sync'),
+    )
   );
-  foreach ($products as $product) {
-    $shopify_product = shopify_product_update($product['id'], 0, $product);
-    $shopify_product->save();
+  dpm($products);
+  if (!empty($products)) {
+    foreach ($products as $product) {
+      $shopify_product = shopify_product_update($product['id'], 0, $product);
+      $shopify_product->save();
 
-    foreach ($product['variants'] as $v) {
-      $variant = shopify_product_update($product['id'], $v['id'], $v);
-      $variant->save();
-      $context['results'][] = $variant->product_id . ' : ' . check_plain($variant->title);
+      foreach ($product['variants'] as $v) {
+        $variant = shopify_product_update($product['id'], $v['id'], $v);
+        $variant->save();
+        $context['results'][] = $variant->product_id . ' : ' . check_plain($variant->title);
+      }
+      $context['results'][] = $shopify_product->product_id . ' : ' . check_plain($shopify_product->title);
     }
-    $context['results'][] = $shopify_product->product_id . ' : ' . check_plain($shopify_product->title);
+    $context['message'] = t('Syncing product "@title" and its variants', array('@title' => $shopify_product->title)) . ' ' . $operation_details;
+    $context['link'] = $products->link;
   }
-
-  $context['message'] = t('Syncing product "@title" and its variants', array('@title' => $shopify_product->title)) . ' ' . $operation_details;
 }
 
 /**

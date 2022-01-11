@@ -4,39 +4,48 @@
  * Contains functions for working with the Shopify API.
  */
 
+use Osiset\BasicShopifyAPI\BasicShopifyAPI;
+use Osiset\BasicShopifyAPI\Options;
+use Osiset\BasicShopifyAPI\Session;
+
 // Sleep timeout in ms.
 define('SHOPIFY_API_CALL_TIMEOUT', 500);
+
+// Required libraries
+include_once(backdrop_get_path('module', 'shopify') . '/library/BasicShopifyAPI/vendor/autoload.php');
 
 /**
  * Create a Shopify API client class.
  *
  * @return
- *   A ShopifyClient class if all connection settings are present, otherwise
+ *   A BasicShopifyAPI class if all connection settings are present, otherwise
  *   NULL.
  */
 function shopify_api_get_client() {
-  // Load the library.
-  $loaded = include_once(backdrop_get_path('module', 'shopify') . '/library/shopify/shopify.php');
 
-  if ($loaded) {
-    // Mark what is required.
-    $required = array('domain', 'token', 'secret', 'key');
+  // Mark what is required.
+  $required = array('domain', 'token', 'secret', 'key');
 
-    // Iterate the required items and fetch the data.
-    foreach ($required as $key) {
-      // If we cannot get a value, then we cannot get a client.
-      if (!(${$key} = config_get('shopify.settings', "api_{$key}"))) {
-        return NULL;
-      }
+  // Iterate the required items and fetch the data.
+  foreach ($required as $key) {
+    // If we cannot get a value, then we cannot get a client.
+    if (!(${$key} = config_get('shopify.settings', "api_{$key}"))) {
+      return NULL;
     }
+  }
 
-    // Create the client.
-    return new ShopifyClient($domain, $token, $key, $secret);
-  }
-  else {
-    // Library did not load correctly.
-    return NULL;
-  }
+  // Create options for the API
+  $options = new Options();
+  $options->setVersion('2022-01');
+  $options->setApiKey($key);
+  $options->setApiPassword($secret);
+
+  // Create the client and session
+  $client = new BasicShopifyAPI($options);
+  $client->setSession(new Session($domain, $token));
+
+  return $client;
+
 }
 
 /**
@@ -46,29 +55,37 @@ function shopify_api_get_client() {
  *   HTTP method: GET, POST, PUT, DELETE.
  * @param string $path
  *   API path to the resource.
- * @param array $options
- *   Options to pass to the API call.
+ * @param array $params
+ *   Parameters to pass to the API call.
  *
  * @return array|int
  *   Returns the API response data. May be an array or count.
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_call($method, $path, array $options = array()) {
+function shopify_api_call($method, $path, array $params = array()) {
   if ($timeout = config_get('shopify.settings', 'api_next_timeout')) {
     // Sleep for a while to let the bucket empty out a bit.
     usleep($timeout * 1000);
     config_set('shopify.settings', 'api_next_timeout', 0);
   }
   $client = shopify_api_get_client();
-  if (!$client instanceof ShopifyClient) {
-    throw new Exception('Unable to create ShopifyClient. Check your Shopify API credentials at /admin/shopify/api');
+  if (!$client instanceof BasicShopifyAPI) {
+    throw new Exception('Unable to create BasicShopifyAPI. Check your Shopify API credentials at /admin/shopify/api');
   }
-  $result = $client->call($method, '/admin/' . $path . '.json', $options);
+  $result = $client->rest($method, '/admin/' . $path . '.json', $params);
   if (shopify_api_call_limit_reached($client)) {
     config_set('shopify.settings', 'api_next_timeout', shopify_api_get_next_timeout());
   }
-  return $result;
+  if (!empty($result['body']->container[$path])) {
+    return $result['body']->container[$path];
+  }
+  elseif (!empty($result['body']->container['count'])) {
+    return $result['body']->container['count'];
+  }
+  else {
+    return 0;
+  }
 }
 
 /**
@@ -89,13 +106,16 @@ function shopify_api_get_next_timeout() {
 /**
  * Determines if the API call limits have been reached and should be throttled.
  *
- * @param \ShopifyClient $client
+ * @param \BasicShopifyAPI $client
  *   Shopify API client.
  *
  * @return bool
  *   Returns TRUE if the following call should be throttled.
  */
-function shopify_api_call_limit_reached(ShopifyClient $client) {
+function shopify_api_call_limit_reached(BasicShopifyAPI $client) {
+  // Temporarily disable as new library includes basic rate limiting OOTB.
+  return 0;
+
   try {
     if ($client->callsMade() >= ($client->callLimit() - 2)) {
       return TRUE;
@@ -157,23 +177,23 @@ function shopify_api_get_product_path($product_id, $variant_id = 0) {
 /**
  * Get Shopify products from the API.
  *
- * @param array $options
- *   Arguments to pass to the API.
+ * @param array $params
+ *   Parameters to pass to the API.
  *
  * @return array
  *   Returns the API response data.
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_get_products(array $options = array()) {
-  return shopify_api_call('GET', 'products', $options);
+function shopify_api_get_products(array $params = array()) {
+  return shopify_api_call('GET', 'products', $params);
 }
 
 /**
  * Get Shopify collections from the API.
  *
- * @param array $options
- *   Arguments to pass to the API.
+ * @param array $params
+ *   Parameters to pass to the API.
  * @param string $type
  *   Type of collections to get, options are:
  *   - both: Get smart and custom collections.
@@ -185,13 +205,13 @@ function shopify_api_get_products(array $options = array()) {
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_get_collections(array $options = array(), $type = 'both') {
+function shopify_api_get_collections(array $params = array(), $type = 'both') {
   $smart_collections = $custom_collections = array();
   if ($type == 'both' || $type == 'smart') {
-    $smart_collections = shopify_api_call('GET', 'smart_collections', $options);
+    $smart_collections = shopify_api_call('GET', 'smart_collections', $params);
   }
   if ($type == 'both' || $type == 'custom') {
-    $custom_collections = shopify_api_call('GET', 'custom_collections', $options);
+    $custom_collections = shopify_api_call('GET', 'custom_collections', $params);
   }
   return array_merge($smart_collections, $custom_collections);
 }
@@ -199,7 +219,7 @@ function shopify_api_get_collections(array $options = array(), $type = 'both') {
 /**
  * Get Shopify collects from the API.
  *
- * @param array $options
+ * @param array $params
  *   Arguments to pass the API.
  *
  * @return array
@@ -207,23 +227,23 @@ function shopify_api_get_collections(array $options = array(), $type = 'both') {
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_get_collects(array $options = array()) {
-  return shopify_api_call('GET', 'collects', $options);
+function shopify_api_get_collects(array $params = array()) {
+  return shopify_api_call('GET', 'collects', $params);
 }
 
 /**
  * Get the Shopify product count from the API.
  *
- * @param array $options
- *   Arguments to pass to the API.
+ * @param array $params
+ *   Parameters to pass to the API.
  *
  * @return int
  *   Returns the product count.
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_get_product_count(array $options = array()) {
-  return shopify_api_call('GET', 'products/count', $options);
+function shopify_api_get_product_count(array $params = array()) {
+  return shopify_api_call('GET', 'products/count', $params);
 }
 
 /**
@@ -231,23 +251,23 @@ function shopify_api_get_product_count(array $options = array()) {
  *
  * @param int $product_id
  *   Product ID.
- * @param array $options
- *   Arguments to pass to the API.
+ * @param array $params
+ *   Parameters to pass to the API.
  *
  * @return int
  *   Returns the number of variants for this product.
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_get_product_variants_count($product_id, array $options = array()) {
-  return shopify_api_call('GET', "products/{$product_id}/variants/count", $options);
+function shopify_api_get_product_variants_count($product_id, array $params = array()) {
+  return shopify_api_call('GET', "products/{$product_id}/variants/count", $params);
 }
 
 /**
  * Get Shopify collections count from the API.
  *
- * @param array $options
- *   Arguments to pass to the API.
+ * @param array $params
+ *   Parameters to pass to the API.
  * @param string $type
  *   Type of collections to count, options are:
  *   - both: Get smart and custom collections count.
@@ -259,13 +279,13 @@ function shopify_api_get_product_variants_count($product_id, array $options = ar
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_get_collection_count(array $options = array(), $type = 'both') {
+function shopify_api_get_collection_count(array $params = array(), $type = 'both') {
   $smart_count = $custom_count = 0;
   if ($type == 'both' || $type == 'smart') {
-    $smart_count = shopify_api_call('GET', 'smart_collections/count', $options);
+    $smart_count = shopify_api_call('GET', 'smart_collections/count', $params);
   }
   if ($type == 'both' || $type == 'custom') {
-    $custom_count = shopify_api_call('GET', 'custom_collections/count', $options);
+    $custom_count = shopify_api_call('GET', 'custom_collections/count', $params);
   }
   return $custom_count + $smart_count;
 }
@@ -275,16 +295,16 @@ function shopify_api_get_collection_count(array $options = array(), $type = 'bot
  *
  * @param int $product_id
  *   Shopify Product ID.
- * @param array $options
- *   Arguments to pass to the API.
+ * @param array $params
+ *   Parameters to pass to the API.
  *
  * @return array
  *   Returns the API response data.
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_get_product($product_id, array $options = array()) {
-  return shopify_api_call('GET', "products/{$product_id}", $options);
+function shopify_api_get_product($product_id, array $params = array()) {
+  return shopify_api_call('GET', "products/{$product_id}", $params);
 }
 
 /**
@@ -292,16 +312,16 @@ function shopify_api_get_product($product_id, array $options = array()) {
  *
  * @param int $product_id
  *   Shopify Product ID.
- * @param array $options
- *   Arguments to pass to the API.
+ * @param array $params
+ *   Parameters to pass to the API.
  *
  * @return array
  *   Returns the API response data.
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_get_product_variants($product_id, array $options = array()) {
-  return shopify_api_call('GET', "products/{$product_id}/variants", $options);
+function shopify_api_get_product_variants($product_id, array $params = array()) {
+  return shopify_api_call('GET', "products/{$product_id}/variants", $params);
 }
 
 /**
@@ -309,16 +329,16 @@ function shopify_api_get_product_variants($product_id, array $options = array())
  *
  * @param int $variant_id
  *   Shopify Variant ID.
- * @param array $options
- *   Arguments to pass to the API.
+ * @param array $params
+ *   Parameters to pass to the API.
  *
  * @return array
  *   Returns the API response data.
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_get_variant($variant_id, array $options = array()) {
-  return shopify_api_call('GET', "variants/{$variant_id}", $options);
+function shopify_api_get_variant($variant_id, array $params = array()) {
+  return shopify_api_call('GET', "variants/{$variant_id}", $params);
 }
 
 /**
@@ -339,31 +359,31 @@ function shopify_api_get_product_images($product_id) {
 /**
  * Get Shopify webhooks.
  *
- * @param array $options
- *   Arguments to pass to the API.
+ * @param array $params
+ *   Parameters to pass to the API.
  *
  * @return array
  *   Returns the API response data.
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_get_webhooks(array $options = array()) {
-  return shopify_api_call('GET', 'webhooks', $options);
+function shopify_api_get_webhooks(array $params = array()) {
+  return shopify_api_call('GET', 'webhooks', $params);
 }
 
 /**
  * Get the Shopify webhooks count.
  *
- * @param array $options
- *   Arguments to pass to the API.
+ * @param array $params
+ *   Parameters to pass to the API.
  *
  * @return int
  *   Returns the webhooks count.
  *
  * @throws \ShopifyApiException
  */
-function shopify_api_get_webhook_count(array $options = array()) {
-  return shopify_api_call('GET', 'webhooks/count', $options);
+function shopify_api_get_webhook_count(array $params = array()) {
+  return shopify_api_call('GET', 'webhooks/count', $params);
 }
 
 /**

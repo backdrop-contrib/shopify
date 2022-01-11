@@ -25,7 +25,7 @@ function shopify_requirements($phase) {
   elseif ($phase == 'runtime') {
     // No credentials provided for Shopify API.
     $client = shopify_api_get_client();
-    if (!$client instanceof ShopifyClient) {
+    if (!$client instanceof BasicShopifyAPI) {
       $requirements['shopify_ecommerce'] = array(
         'title' => $t('Shopify eCommerce'),
         'description' => $t('Unable to install Shopify eCommerce. Do you have a <a href="@shopify_website">Shopify Account</a>? If so, make sure you\'ve entered your API credentials at <a href="@shopify_api_config">/admin/shopify/api</a>', array(
@@ -40,7 +40,7 @@ function shopify_requirements($phase) {
     try {
       $client = shopify_api_get_client();
       if ($client) {
-        $client->call('GET', '/admin/shop.json');
+        $client->rest('GET', '/admin/shop.json');
         $requirements[$key] = array(
           'title' => t('Shopify'),
           'value' => t('API credentials connect successfully.'),
@@ -228,7 +228,7 @@ function shopify_install() {
 
   // Set the shop info on install.
   $client = shopify_api_get_client();
-  $info = $client->call('GET', '/admin/shop.json');
+  $info = $client->rest('GET', '/admin/shop.json');
   config_set('shopify.settings', 'store_info', $info);
 
 //  Create Shopify Tags vocabulary

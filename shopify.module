@@ -1806,8 +1806,8 @@ function shopify_form_taxonomy_form_term_alter(&$form, &$form_state) {
 /**
  * Implements hook_ctools_plugin_api().
  */
-function shopify_ctools_plugin_api($owner, $api) {
-  if ($owner == 'metatag' && $api == 'metatag') {
+function shopify_ctools_plugin_api($owner, $client) {
+  if ($owner == 'metatag' && $client == 'metatag') {
     return array('version' => 1);
   }
 }
@@ -1829,5 +1829,6 @@ function shopify_autoload_info() {
     'views_handler_field_shopify_product_edit_link' => 'views/views_handler_field_shopify_product_edit_link.inc',
     'views_handler_field_shopify_product_link' => 'views/views_handler_field_shopify_product_link.inc',
     'views_handler_field_shopify_product_variants' => 'views/views_handler_field_shopify_product_variants.inc',
+    'BasicShopifyAPI' => 'library/BasicShopifyAPI/src/BasicShopifyAPI.php',
   );
 }

@@ -397,11 +397,11 @@ function shopify_library_info() {
   $libraries = array();
   $libraries['shopify'] = array(
     'name' => 'Shopify',
-    'website' => 'https://github.com/cmcdonaldca/ohShopify.php',
-    'version' => '1.0',
+    'website' => 'https://github.com/osiset/Basic-Shopify-API',
+    'version' => '10.0.5',
     'files' => array(
       'php' => array(
-        'shopify.php',
+        backdrop_get_path('module', 'shopify') . '/library/BasicShopifyAPI/vendor/autoload.php',
       ),
     ),
   );
@@ -1465,7 +1465,7 @@ function shopify_product_form($form, &$form_state, ShopifyProduct $product = NUL
     $path = array();
     if (!empty($form_state['shopify_product']->id)) {
       $conditions = array('source' => 'product/' . $form_state['shopify_product']->id);
-      $langcode = entity_language('shopify_product', $form_state['shopify_product']);
+      $langcode = entity_plus_language('shopify_product', $form_state['shopify_product']);
 
       if ($langcode == NULL) {
         $conditions['language'] = LANGUAGE_NONE;

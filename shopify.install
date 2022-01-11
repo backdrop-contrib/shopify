@@ -14,7 +14,7 @@ function shopify_requirements($phase) {
   if ($phase == 'install') {
     // Check if we're running a 64-bit version of PHP.
     if (PHP_INT_SIZE === 4) {
-      $requirements['shopify_ecommerce'] = array(
+      $requirements['shopify'] = array(
         'title' => $t('Shopify eCommerce'),
         'description' => $t('Unable to install Shopify eCommerce. Your server is running the 32-bit version of PHP. A 64-bit version is required.'),
         'severity' => REQUIREMENT_ERROR,
@@ -25,8 +25,8 @@ function shopify_requirements($phase) {
   elseif ($phase == 'runtime') {
     // No credentials provided for Shopify API.
     $client = shopify_api_get_client();
-    if (!$client instanceof BasicShopifyAPI) {
-      $requirements['shopify_ecommerce'] = array(
+    if (!$client instanceof Osiset\BasicShopifyAPI\BasicShopifyAPI) {
+      $requirements['shopify'] = array(
         'title' => $t('Shopify eCommerce'),
         'description' => $t('Unable to install Shopify eCommerce. Do you have a <a href="@shopify_website">Shopify Account</a>? If so, make sure you\'ve entered your API credentials at <a href="@shopify_api_config">/admin/shopify/api</a>', array(
           '@shopify_website' => 'https://www.shopify.com/?ref=bonify',
@@ -38,18 +38,18 @@ function shopify_requirements($phase) {
     }
     // Attempt to connect and get basic store information.
     try {
-      $client = shopify_api_get_client();
       if ($client) {
-        $client->rest('GET', '/admin/shop.json');
-        $requirements[$key] = array(
+        $result = shopify_api_call('GET', 'shop');
+        $requirements['shopify'] = array(
           'title' => t('Shopify'),
           'value' => t('API credentials connect successfully.'),
+          'description' => $result['name'],
           'severity' => REQUIREMENT_OK,
         );
       }
     }
     catch (Exception $e) {
-      $requirements['shopify_ecommerce'] = array(
+      $requirements['shopify'] = array(
         'title' => $t('Shopify eCommerce'),
         'description' => $t('Cannot connect your credentials to the Shopify API. Do you have a <a href="@shopify_website">Shopify Account</a>? <a href="@shopify_api_config">Are your API settings correct</a>?', array(
           '@shopify_website' => 'https://www.shopify.com/?ref=bonify',

@@ -7,8 +7,13 @@
 /**
  * Class ShopifyProduct
  */
-class ShopifyProduct extends Entity {
+class ShopifyProduct extends Entity implements EntityInterface {
   public $id;
+  protected $entityType; // stores the entity type
+  protected $entityInfo; // stores the info provided in hook_entity_info() for this entity
+  protected $idKey, $nameKey, $statusKey; // Various key names for storing id, name and status
+  protected $defaultLabel = FALSE;
+  protected $wrapper; // stores the entitiy_metadata_wrapper for this entity
 
   /**
    * Implements EntityInterface::id().
@@ -22,6 +27,20 @@ class ShopifyProduct extends Entity {
    */
   public function entityType() {
     return 'shopify_product';
+  }
+
+  /**
+   * A convenience method, it returns an entity_metadata_wrapper for the entity.
+   */
+  public function wrapper() {
+    if (empty($this->wrapper)) {
+      $this->wrapper = entity_metadata_wrapper($this->entityType, $this);
+    }
+    elseif ($this->wrapper->value() !== $this) {
+      // Wrapper has been modified outside, so we'd better create a new one.
+      $this->wrapper = entity_metadata_wrapper($this->entityType, $this);
+    }
+    return $this->wrapper;
   }
 
   /**

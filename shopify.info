@@ -1,5 +1,5 @@
-name = Shopify eCommerce
-description = Display your Shopify store within your Backdrop site.
+name = Shopify
+description = Display your Shopify eCommerce store within your Backdrop site.
 backdrop = 1.x
 type = module
 configure = admin/shopify/api

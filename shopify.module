@@ -94,97 +94,99 @@ function shopify_permission() {
  */
 function shopify_menu() {
 
-  // Create nice shortcut links for shopify admin pages.
-  $store_url = 'https://' . shopify_store_info()->domain;
-  $items['admin/shopify/store'] = array(
-    'title' => 'Admin',
-    'page callback' => 'backdrop_goto',
-    'page arguments' => array($store_url . '/admin'),
-    'access callback' => 'shopify_user_access',
-    'access arguments' => array('administer shopify'),
-    'options' => array('attributes' => array('target' => '_blank')),
-    'weight' => -999,
-  );
-  $items['admin/shopify/store/settings'] = array(
-    'title' => 'Settings',
-    'page callback' => 'backdrop_goto',
-    'page arguments' => array($store_url . '/admin/settings/general'),
-    'access callback' => 'shopify_user_access',
-    'access arguments' => array('administer shopify'),
-    'options' => array('attributes' => array('target' => '_blank')),
-  );
-  $items['admin/shopify/store/products'] = array(
-    'title' => 'Products',
-    'page callback' => 'backdrop_goto',
-    'page arguments' => array($store_url . '/admin/products'),
-    'access callback' => 'shopify_user_access',
-    'access arguments' => array('administer shopify'),
-    'options' => array('attributes' => array('target' => '_blank')),
-  );
-  $items['admin/shopify/store/collections'] = array(
-    'title' => 'Collections',
-    'page callback' => 'backdrop_goto',
-    'page arguments' => array($store_url . '/admin/collections'),
-    'access callback' => 'shopify_user_access',
-    'access arguments' => array('administer shopify'),
-    'options' => array('attributes' => array('target' => '_blank')),
-  );
-  $items['admin/shopify/store/gift_cards'] = array(
-    'title' => 'Gift Cards',
-    'page callback' => 'backdrop_goto',
-    'page arguments' => array($store_url . '/admin/gift_cards'),
-    'access callback' => 'shopify_user_access',
-    'access arguments' => array('administer shopify'),
-    'options' => array('attributes' => array('target' => '_blank')),
-  );
-  $items['admin/shopify/store/orders'] = array(
-    'title' => 'Orders',
-    'page callback' => 'backdrop_goto',
-    'page arguments' => array($store_url . '/admin/orders'),
-    'access callback' => 'shopify_user_access',
-    'access arguments' => array('administer shopify'),
-    'options' => array('attributes' => array('target' => '_blank')),
-  );
-  $items['admin/shopify/store/customers'] = array(
-    'title' => 'Customers',
-    'page callback' => 'backdrop_goto',
-    'page arguments' => array($store_url . '/admin/customers'),
-    'access callback' => 'shopify_user_access',
-    'access arguments' => array('administer shopify'),
-    'options' => array('attributes' => array('target' => '_blank')),
-  );
-  $items['admin/shopify/store/reports'] = array(
-    'title' => 'Reports',
-    'page callback' => 'backdrop_goto',
-    'page arguments' => array($store_url . '/admin/reports'),
-    'access callback' => 'shopify_user_access',
-    'access arguments' => array('administer shopify'),
-    'options' => array('attributes' => array('target' => '_blank')),
-  );
-  $items['admin/shopify/store/discounts'] = array(
-    'title' => 'Discounts',
-    'page callback' => 'backdrop_goto',
-    'page arguments' => array($store_url . '/admin/discounts'),
-    'access callback' => 'shopify_user_access',
-    'access arguments' => array('administer shopify'),
-    'options' => array('attributes' => array('target' => '_blank')),
-  );
-  $items['admin/shopify/store/apps'] = array(
-    'title' => 'Apps',
-    'page callback' => 'backdrop_goto',
-    'page arguments' => array($store_url . '/admin/apps'),
-    'access callback' => 'shopify_user_access',
-    'access arguments' => array('administer shopify'),
-    'options' => array('attributes' => array('target' => '_blank')),
-  );
-  $items['admin/shopify/store/configure'] = array(
-    'title' => 'Configure',
-    'page callback' => 'backdrop_goto',
-    'page arguments' => array($store_url . '/admin/dashboard/online'),
-    'access callback' => 'shopify_user_access',
-    'access arguments' => array('administer shopify'),
-    'options' => array('attributes' => array('target' => '_blank')),
-  );
+  if (!empty(shopify_store_info()->domain)) {
+    // Create nice shortcut links for shopify admin pages.
+    $store_url = 'https://' . shopify_store_info()->domain;
+    $items['admin/shopify/store'] = array(
+      'title' => 'Admin',
+      'page callback' => 'backdrop_goto',
+      'page arguments' => array($store_url . '/admin'),
+      'access callback' => 'shopify_user_access',
+      'access arguments' => array('administer shopify'),
+      'options' => array('attributes' => array('target' => '_blank')),
+      'weight' => -999,
+    );
+    $items['admin/shopify/store/settings'] = array(
+      'title' => 'Settings',
+      'page callback' => 'backdrop_goto',
+      'page arguments' => array($store_url . '/admin/settings/general'),
+      'access callback' => 'shopify_user_access',
+      'access arguments' => array('administer shopify'),
+      'options' => array('attributes' => array('target' => '_blank')),
+    );
+    $items['admin/shopify/store/products'] = array(
+      'title' => 'Products',
+      'page callback' => 'backdrop_goto',
+      'page arguments' => array($store_url . '/admin/products'),
+      'access callback' => 'shopify_user_access',
+      'access arguments' => array('administer shopify'),
+      'options' => array('attributes' => array('target' => '_blank')),
+    );
+    $items['admin/shopify/store/collections'] = array(
+      'title' => 'Collections',
+      'page callback' => 'backdrop_goto',
+      'page arguments' => array($store_url . '/admin/collections'),
+      'access callback' => 'shopify_user_access',
+      'access arguments' => array('administer shopify'),
+      'options' => array('attributes' => array('target' => '_blank')),
+    );
+    $items['admin/shopify/store/gift_cards'] = array(
+      'title' => 'Gift Cards',
+      'page callback' => 'backdrop_goto',
+      'page arguments' => array($store_url . '/admin/gift_cards'),
+      'access callback' => 'shopify_user_access',
+      'access arguments' => array('administer shopify'),
+      'options' => array('attributes' => array('target' => '_blank')),
+    );
+    $items['admin/shopify/store/orders'] = array(
+      'title' => 'Orders',
+      'page callback' => 'backdrop_goto',
+      'page arguments' => array($store_url . '/admin/orders'),
+      'access callback' => 'shopify_user_access',
+      'access arguments' => array('administer shopify'),
+      'options' => array('attributes' => array('target' => '_blank')),
+    );
+    $items['admin/shopify/store/customers'] = array(
+      'title' => 'Customers',
+      'page callback' => 'backdrop_goto',
+      'page arguments' => array($store_url . '/admin/customers'),
+      'access callback' => 'shopify_user_access',
+      'access arguments' => array('administer shopify'),
+      'options' => array('attributes' => array('target' => '_blank')),
+    );
+    $items['admin/shopify/store/reports'] = array(
+      'title' => 'Reports',
+      'page callback' => 'backdrop_goto',
+      'page arguments' => array($store_url . '/admin/reports'),
+      'access callback' => 'shopify_user_access',
+      'access arguments' => array('administer shopify'),
+      'options' => array('attributes' => array('target' => '_blank')),
+    );
+    $items['admin/shopify/store/discounts'] = array(
+      'title' => 'Discounts',
+      'page callback' => 'backdrop_goto',
+      'page arguments' => array($store_url . '/admin/discounts'),
+      'access callback' => 'shopify_user_access',
+      'access arguments' => array('administer shopify'),
+      'options' => array('attributes' => array('target' => '_blank')),
+    );
+    $items['admin/shopify/store/apps'] = array(
+      'title' => 'Apps',
+      'page callback' => 'backdrop_goto',
+      'page arguments' => array($store_url . '/admin/apps'),
+      'access callback' => 'shopify_user_access',
+      'access arguments' => array('administer shopify'),
+      'options' => array('attributes' => array('target' => '_blank')),
+    );
+    $items['admin/shopify/store/configure'] = array(
+      'title' => 'Configure',
+      'page callback' => 'backdrop_goto',
+      'page arguments' => array($store_url . '/admin/dashboard/online'),
+      'access callback' => 'shopify_user_access',
+      'access arguments' => array('administer shopify'),
+      'options' => array('attributes' => array('target' => '_blank')),
+    );
+  }
 
   $items['product/%shopify_product'] = array(
     'page callback' => 'entity_ui_entity_page_view',
@@ -488,7 +490,6 @@ function shopify_sync_products(array $options = array()) {
 function shopify_sync_collections(array $options = array()) {
   $collections = shopify_api_get_collections($options);
   foreach ($collections as $collection) {
-    dpm($collection);
     $term = shopify_collection_load($collection['id']);
     if (!$term) {
       // Need to create a new collection.
@@ -575,7 +576,8 @@ function shopify_sync_deleted_products(array $options = array()) {
 
     // Build a list of all products in the Shopify system.
     $products = shopify_api_get_products($options);
-
+  dpm(__FUNCTION__);
+dpm($products);
     // Merge all variants for these products.
     foreach ($products as $p) {
       $product_ids[] = $p['id'];
@@ -644,10 +646,12 @@ function shopify_menu_alter(&$items) {
   $items['admin/shopify/products']['type'] = MENU_LOCAL_TASK;
   $items['admin/shopify/products']['weight'] = -5;
 
-  // Products are added on Shopify, not in Backdrop.
-  $items['admin/shopify/products/add']['page callback'] = 'backdrop_goto';
-  $items['admin/shopify/products/add']['page arguments'] = array('https://' . shopify_store_info()->domain . '/admin/products/new');
-  $items['admin/shopify/products/add']['options'] = array('attributes' => array('target' => '_blank'));
+  if (!empty(shopify_store_info()->domain)) {
+    // Products are added on Shopify, not in Backdrop.
+    $items['admin/shopify/products/add']['page callback'] = 'backdrop_goto';
+    $items['admin/shopify/products/add']['page arguments'] = array('https://' . shopify_store_info()->domain . '/admin/products/new');
+    $items['admin/shopify/products/add']['options'] = array('attributes' => array('target' => '_blank'));
+  }
 }
 
 /**
@@ -688,7 +692,7 @@ function shopify_redirect() {
  *   Shopify product entity.
  */
 function shopify_redirect_to_edit(ShopifyProduct $product) {
-  $path = "admin/shopify/products/manage/{$product->id}/edit";
+  $path = "admin/shopify/products/manage/$product->id/edit";
   backdrop_goto($path);
 }
 
@@ -974,7 +978,7 @@ function shopify_product_load_single($product_id, $variant_id = 0) {
   $result = $query->execute();
   if (isset($result['shopify_product'])) {
     $ids = array_keys($result['shopify_product']);
-    $shopify_product = entity_load_single('shopify_product', reset($ids));
+    $shopify_product = entity_load('shopify_product', reset($ids));
   }
   return isset($shopify_product) ? $shopify_product : NULL;
 }
@@ -996,7 +1000,7 @@ function shopify_variant_load_single($variant_id) {
   $result = $query->execute();
   if (isset($result['shopify_product'])) {
     $ids = array_keys($result['shopify_product']);
-    $shopify_product = entity_load_single('shopify_product', reset($ids));
+    $shopify_product = entity_load('shopify_product', reset($ids));
   }
   return isset($shopify_product) ? $shopify_product : NULL;
 }

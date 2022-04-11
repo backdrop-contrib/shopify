@@ -38,7 +38,7 @@ function shopify_search_execute($keys = NULL, $conditions = NULL) {
   $query = db_select('shopify_products')->extend('PagerDefault');
   $query->fields('shopify_products', array('id', 'variant_id'));
   $query->condition('variant_id', '0');
-  $query->condition(db_or()
+$query->condition(db_or()
     ->condition('title', '%' . db_like($keys) . '%', 'LIKE')
     ->condition('body_html', '%' . db_like($keys) . '%', 'LIKE'));
   $product_ids = $query

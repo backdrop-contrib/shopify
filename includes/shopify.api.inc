@@ -29,7 +29,8 @@ function shopify_api_get_client() {
   // Iterate the required items and fetch the data.
   foreach ($required as $key) {
     // If we cannot get a value, then we cannot get a client.
-    if (!(${$key} = config_get('shopify.settings', "api_{$key}"))) {
+    $setting = config_get('shopify.settings', "api_" . $key);
+    if (!(${$key} = $setting)) {
       return NULL;
     }
   }
@@ -77,6 +78,10 @@ function shopify_api_call($method, $path, array $params = array()) {
   if (shopify_api_call_limit_reached($client)) {
     config_set('shopify.settings', 'api_next_timeout', shopify_api_get_next_timeout());
   }
+  dpm(__FUNCTION__);
+  dpm($method);
+  dpm('/admin/' . $path . '.json');
+  dpm($params);
   if (!empty($result['body']->container[$path])) {
     return $result['body']->container[$path];
   }
@@ -213,7 +218,14 @@ function shopify_api_get_collections(array $params = array(), $type = 'both') {
   if ($type == 'both' || $type == 'custom') {
     $custom_collections = shopify_api_call('GET', 'custom_collections', $params);
   }
-  return array_merge($smart_collections, $custom_collections);
+  $return_array = array();
+  if (!empty($smart_collections)) {
+    $return_array = $smart_collections;
+  }
+  if (!empty($custom_collections)) {
+    $return_array = array_merge($return_array, $custom_collections);
+  }
+  return $return_array;
 }
 
 /**
@@ -260,7 +272,7 @@ function shopify_api_get_product_count(array $params = array()) {
  * @throws \ShopifyApiException
  */
 function shopify_api_get_product_variants_count($product_id, array $params = array()) {
-  return shopify_api_call('GET', "products/{$product_id}/variants/count", $params);
+  return shopify_api_call('GET', "products/$product_id/variants/count", $params);
 }
 
 /**
@@ -304,7 +316,7 @@ function shopify_api_get_collection_count(array $params = array(), $type = 'both
  * @throws \ShopifyApiException
  */
 function shopify_api_get_product($product_id, array $params = array()) {
-  return shopify_api_call('GET', "products/{$product_id}", $params);
+  return shopify_api_call('GET', "products/$product_id", $params);
 }
 
 /**
@@ -321,7 +333,7 @@ function shopify_api_get_product($product_id, array $params = array()) {
  * @throws \ShopifyApiException
  */
 function shopify_api_get_product_variants($product_id, array $params = array()) {
-  return shopify_api_call('GET', "products/{$product_id}/variants", $params);
+  return shopify_api_call('GET', "products/$product_id/variants", $params);
 }
 
 /**
@@ -338,7 +350,7 @@ function shopify_api_get_product_variants($product_id, array $params = array()) 
  * @throws \ShopifyApiException
  */
 function shopify_api_get_variant($variant_id, array $params = array()) {
-  return shopify_api_call('GET', "variants/{$variant_id}", $params);
+  return shopify_api_call('GET', "variants/$variant_id", $params);
 }
 
 /**
@@ -353,7 +365,7 @@ function shopify_api_get_variant($variant_id, array $params = array()) {
  * @throws \ShopifyApiException
  */
 function shopify_api_get_product_images($product_id) {
-  return shopify_api_call('GET', "products/{$product_id}/images");
+  return shopify_api_call('GET', "products/$product_id/images");
 }
 
 /**
@@ -413,5 +425,5 @@ function shopify_api_create_webhook($post) {
  * @throws \ShopifyApiException
  */
 function shopify_api_delete_webhook($id) {
-  return shopify_api_call('DELETE', "webhooks/{$id}");
+  return shopify_api_call('DELETE', "webhooks/$id");
 }

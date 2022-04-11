@@ -627,7 +627,7 @@ class ShopifyEntityBundleableUIController extends ShopifyEntityContentUIControll
  *
  * @see ShopifyEntityDefaultUIController::overviewForm()
  */
-function entity_ui_overview_form($form, &$form_state, $entity_type) {
+function shopify_entity_ui_overview_form($form, &$form_state, $entity_type) {
   return entity_ui_controller($entity_type)->overviewForm($form, $form_state);
 }
 
@@ -636,7 +636,7 @@ function entity_ui_overview_form($form, &$form_state, $entity_type) {
  *
  * @see ShopifyEntityDefaultUIController::operationForm()
  */
-function entity_ui_operation_form($form, &$form_state, $entity_type, $entity, $op) {
+function shopify_entity_ui_operation_form($form, &$form_state, $entity_type, $entity, $op) {
   $form_state['op'] = $op;
   return entity_ui_controller($entity_type)->operationForm($form, $form_state, $entity, $op);
 }
@@ -646,7 +646,7 @@ function entity_ui_operation_form($form, &$form_state, $entity_type, $entity, $o
  *
  * @see entity_ui_form_defaults()
  */
-function entity_ui_main_form_defaults($form, &$form_state, $entity = NULL, $op = NULL) {
+function shopify_entity_ui_main_form_defaults($form, &$form_state, $entity = NULL, $op = NULL) {
   // Now equals entity_ui_form_defaults() but is still here to keep backward
   // compatibility.
   return entity_ui_form_defaults($form, $form_state, $form_state['entity_type'], $entity, $op);
@@ -658,7 +658,7 @@ function entity_ui_main_form_defaults($form, &$form_state, $entity = NULL, $op =
  * @return object
  *   The cloned entity object.
  */
-function entity_ui_clone_entity($entity_type, $entity) {
+function shopify_entity_ui_clone_entity($entity_type, $entity) {
   // Clone the entity and make sure it will get saved as a new entity.
   $entity = clone $entity;
 
@@ -685,7 +685,7 @@ function entity_ui_clone_entity($entity_type, $entity) {
  *
  * @see ShopifyEntityDefaultUIController::hook_forms()
  */
-function entity_ui_form_defaults($form, &$form_state, $entity_type, $entity = NULL, $op = NULL) {
+function shopify_entity_ui_form_defaults($form, &$form_state, $entity_type, $entity = NULL, $op = NULL) {
   $defaults = array(
     'entity_type' => $entity_type,
   );
@@ -710,7 +710,7 @@ function entity_ui_form_defaults($form, &$form_state, $entity_type, $entity = NU
 /**
  * Validation callback for forms implemented by the UI controller.
  */
-function entity_ui_controller_form_validate($form, &$form_state) {
+function shopify_entity_ui_controller_form_validate($form, &$form_state) {
   // Remove 'entity_ui_' prefix and the '_form' suffix.
   $base = substr($form_state['build_info']['base_form_id'], 10, -5);
   $method = $base . 'FormValidate';
@@ -720,7 +720,7 @@ function entity_ui_controller_form_validate($form, &$form_state) {
 /**
  * Submit callback for forms implemented by the UI controller.
  */
-function entity_ui_controller_form_submit($form, &$form_state) {
+function shopify_entity_ui_controller_form_submit($form, &$form_state) {
   // Remove 'entity_ui_' prefix and the '_form' suffix.
   $base = substr($form_state['build_info']['base_form_id'], 10, -5);
   $method = $base . 'FormSubmit';
@@ -739,7 +739,7 @@ function entity_ui_controller_form_submit($form, &$form_state) {
  * @see ShopifyEntityDefaultUIController::hook_forms()
  * @see ShopifyEntityDefaultUIController::entityFormSubmitBuildEntity()
  */
-function entity_ui_form_submit_build_entity($form, &$form_state) {
+function shopify_entity_ui_form_submit_build_entity($form, &$form_state) {
   return entity_ui_controller($form_state['entity_type'])->entityFormSubmitBuildEntity($form, $form_state);
 }
 
@@ -749,7 +749,7 @@ function entity_ui_form_submit_build_entity($form, &$form_state) {
  * We don't allow numeric machine names, as entity_load() treats them as the
  * numeric identifier and they are easily confused with ids in general.
  */
-function entity_ui_validate_machine_name($element, &$form_state) {
+function shopify_entity_ui_validate_machine_name($element, &$form_state) {
   if (is_numeric($element['#value'])) {
     form_error($element, t('Machine-readable names must not consist of numbers only.'));
   }
@@ -760,7 +760,7 @@ function entity_ui_validate_machine_name($element, &$form_state) {
  *
  * @ingroup themeable
  */
-function theme_entity_ui_overview_item($variables) {
+function shopify_theme_entity_ui_overview_item($variables) {
   $output = $variables['url'] ? l($variables['label'], $variables['url']['path'], $variables['url']['options']) : check_plain($variables['label']);
   if ($variables['name']) {
     $output .= ' <small>(' . t('Machine name') . ': ' . check_plain($variables['name']) . ')</small>';

@@ -15,43 +15,31 @@ function shopify_requirements($phase) {
     // Check if we're running a 64-bit version of PHP.
     if (PHP_INT_SIZE === 4) {
       $requirements['shopify'] = array(
-        'title' => $t('Shopify eCommerce'),
-        'description' => $t('Unable to install Shopify eCommerce. Your server is running the 32-bit version of PHP. A 64-bit version is required.'),
+        'title' => $t('Shopify'),
+        'description' => $t('Unable to install Shopify. Your server is running the 32-bit version of PHP. A 64-bit version is required.'),
         'severity' => REQUIREMENT_ERROR,
       );
       return $requirements;
     }
   }
   elseif ($phase == 'runtime') {
-    // No credentials provided for Shopify API.
-    $client = shopify_api_get_client();
-    if (!$client instanceof Osiset\BasicShopifyAPI\BasicShopifyAPI) {
-      $requirements['shopify'] = array(
-        'title' => $t('Shopify eCommerce'),
-        'description' => $t('Unable to install Shopify eCommerce. Do you have a <a href="@shopify_website">Shopify Account</a>? If so, make sure you\'ve entered your API credentials at <a href="@shopify_api_config">/admin/shopify/api</a>', array(
-          '@shopify_website' => 'https://www.shopify.com/?ref=bonify',
-          '@shopify_api_config' => url('admin/shopify/api'),
-        )),
-        'severity' => REQUIREMENT_ERROR,
-      );
-      return $requirements;
-    }
-    // Attempt to connect and get basic store information.
-    try {
-      if ($client) {
-        $result = shopify_api_call('GET', 'shop');
-        $requirements['shopify'] = array(
-          'title' => t('Shopify'),
-          'value' => t('API credentials connect successfully.'),
-          'description' => $result['name'],
-          'severity' => REQUIREMENT_OK,
-        );
+    $incomplete_configuration = FALSE;
+    // Mark what is required to be configured.
+    $required = array('domain', 'token', 'secret', 'key');
+
+    // Iterate the required items and fetch the data.
+    foreach ($required as $key) {
+      // If we cannot get a value, then we cannot get a client.
+      if (!($key = config_get('shopify.settings', "api_$key"))) {
+        $incomplete_configuration = TRUE;
       }
     }
-    catch (Exception $e) {
+    if ($incomplete_configuration) {
+      // No credentials provided for Shopify API.
       $requirements['shopify'] = array(
-        'title' => $t('Shopify eCommerce'),
-        'description' => $t('Cannot connect your credentials to the Shopify API. Do you have a <a href="@shopify_website">Shopify Account</a>? <a href="@shopify_api_config">Are your API settings correct</a>?', array(
+        'title' => $t('Shopify'),
+        'value' => $t('Shopify API is not configured.'),
+        'description' => $t('Do you have a <a href="@shopify_website">Shopify Account</a>? If so, make sure you\'ve entered your API credentials at <a href="@shopify_api_config">/admin/shopify/api</a>', array(
           '@shopify_website' => 'https://www.shopify.com/?ref=bonify',
           '@shopify_api_config' => url('admin/shopify/api'),
         )),
@@ -59,8 +47,46 @@ function shopify_requirements($phase) {
       );
       return $requirements;
     }
-  }
-
+    else {
+      $client = shopify_api_get_client();
+      if (!$client instanceof Osiset\BasicShopifyAPI\BasicShopifyAPI) {
+        $requirements['shopify'] = array(
+          'title' => $t('Shopify'),
+          'description' => $t('Unable to install Shopify. Do you have a <a href="@shopify_website">Shopify Account</a>? If so, make sure you\'ve entered your API credentials at <a href="@shopify_api_config">/admin/shopify/api</a>', array(
+            '@shopify_website' => 'https://www.shopify.com/?ref=bonify',
+            '@shopify_api_config' => url('admin/shopify/api'),
+          )),
+          'severity' => REQUIREMENT_ERROR,
+        );
+        return $requirements;
+      }
+      // Attempt to connect and get basic store information.
+      try {
+        if ($client) {
+          $result = shopify_api_call('GET', 'shop');
+          $requirements['shopify'] = array(
+            'title' => t('Shopify'),
+            'value' => t('API credentials connect successfully.'),
+            'severity' => REQUIREMENT_OK,
+          );
+          if (!empty($result)) {
+            $requirements['shopify']['description'] = $result['name'];
+          }
+        }
+      }
+      catch (Exception $e) {
+        $requirements['shopify'] = array(
+          'title' => $t('Shopify'),
+          'description' => $t('Cannot connect your credentials to the Shopify API. Do you have a <a href="@shopify_website">Shopify Account</a>? <a href="@shopify_api_config">Are your API settings correct</a>?', array(
+            '@shopify_website' => 'https://www.shopify.com/?ref=bonify',
+            '@shopify_api_config' => url('admin/shopify/api'),
+          )),
+          'severity' => REQUIREMENT_ERROR,
+        );
+        return $requirements;
+      }
+    }
+   }
   return $requirements;
 }
 
@@ -226,12 +252,7 @@ function shopify_install() {
 
   shopify_products_reset_sync_datestamp();
 
-  // Set the shop info on install.
-  $client = shopify_api_get_client();
-  $info = $client->rest('GET', '/admin/shop.json');
-  config_set('shopify.settings', 'store_info', $info);
-
-//  Create Shopify Tags vocabulary
+  //  Create Shopify Tags vocabulary
   $vocabulary = new TaxonomyVocabulary();
   $vocabulary->name = 'Shopify Tags';
   $vocabulary->machine_name = 'shopify_tags';
@@ -243,17 +264,16 @@ function shopify_install() {
   $vocabulary->machine_name = 'shopify_collections';
   taxonomy_vocabulary_save($vocabulary);
 
-  // Create product image field
-  field_create_field(
-    array(
+  // Create product images field
+  $field = array(
     'field_name' => 'shopify_product_images',
     'type' => 'image',
     'cardinality' => -1,
     'settings' => array(),
-  ));
+  );
+  field_create_field($field);
 
-
-  // Create product image field on product entity
+  // Create product images field on product entity
   $instance = array(
     'field_name' => 'shopify_product_images',
     'entity_type' => 'shopify_product',
@@ -281,20 +301,18 @@ function shopify_install() {
       ),
     ),
   );
-
   field_create_instance($instance);
 
-  // Create collections published field.
-  field_create_field(
-    array(
+  // Create collection published field.
+  $field = array(
     'field_name' => 'shopify_collection_published_at',
     'type' => 'datestamp',
     'cardinality' => 1,
     'settings' => array(),
-  ));
+  );
+  field_create_field($field);
 
-
-  // Create collections published instance.
+  // Create collection published instance.
   $instance = array(
     'field_name' => 'shopify_collection_published_at',
     'entity_type' => 'taxonomy_term',
@@ -302,12 +320,10 @@ function shopify_install() {
     'label' => 'Shopify Collection Published Date',
     'required' => FALSE,
   );
-
   field_create_instance($instance);
 
-  // Create Shopify Tags term reference
-  field_create_field(
-    array(
+  // Create Shopify Tags term reference field.
+  $field = array(
     'field_name' => 'shopify_product_tags',
     'type' => 'taxonomy_term_reference',
     'cardinality' => -1,
@@ -319,11 +335,10 @@ function shopify_install() {
         ),
       ),
     ),
-  )
   );
+  field_create_field($field);
 
-
-  // Create product tags term reference on product entity
+  // Create product tags term reference on product entity.
   $instance = array(
     'field_name' => 'shopify_product_tags',
     'entity_type' => 'shopify_product',
@@ -358,12 +373,10 @@ function shopify_install() {
       ),
     ),
   );
-
   field_create_instance($instance);
 
-  // Create Shopify Collections term reference
-  field_create_field(
-    array(
+  // Create Shopify Collections term reference field.
+  $field = array(
     'field_name' => 'shopify_product_collections',
     'type' => 'taxonomy_term_reference',
     'cardinality' => -1,
@@ -375,10 +388,10 @@ function shopify_install() {
         ),
       ),
     ),
-  )
   );
+  field_create_field($field);
 
-  // Create product collections term reference on product entity
+  // Create product collections term reference on product entity.
   $instance = array(
     'field_name' => 'shopify_product_collections',
     'entity_type' => 'shopify_product',
@@ -399,20 +412,18 @@ function shopify_install() {
       ),
     ),
   );
-
   field_create_instance($instance);
 
-  // Create Shopify Collections Image field
-  field_create_field(
-    array(
+  // Create Shopify Collections Image field.
+  $field = array(
     'field_name' => 'shopify_collection_image',
     'type' => 'image',
     'cardinality' => 1,
     'settings' => array(),
-  )
   );
+  field_create_field($field);
 
-  // Create Shopify Collections Image on collections term entity
+  // Create Shopify Collections Image on collections term entity.
   $instance = array(
     'field_name' => 'shopify_collection_image',
     'entity_type' => 'taxonomy_term',
@@ -427,17 +438,14 @@ function shopify_install() {
       ),
     ),
   );
-
   field_create_instance($instance);
 
   // Create field to track the collection ID from Shopify.
-  field_create_field(
-    array(
+  $field = array(
     'field_name' => 'shopify_collection_id',
-    'type' => 'int',
-    'size' => 'big',
-  )
+    'type' => 'text',
   );
+  field_create_field($field);
 
   $instance = array(
     'field_name' => 'shopify_collection_id',
@@ -446,7 +454,6 @@ function shopify_install() {
     'label' => 'Shopify Collection ID',
     'required' => TRUE,
   );
-
   field_create_instance($instance);
 
   $product_settings = array(

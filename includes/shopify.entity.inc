@@ -381,9 +381,7 @@ class ShopifyProduct extends Entity implements EntityInterface {
         image_path_flush($file->uri);
         $files[] = (array) $file;
       }
-      dpm($files);
-      //@todo figure out why the below isn't setting correctly
-      //$this->wrapper()->shopify_product_images->set($files);
+      $this->wrapper()->shopify_product_images->set($files);
     }
   }
 

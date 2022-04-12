@@ -692,7 +692,6 @@ function shopify_update_1000() {
   update_variable_del('shopify_api_token');
   update_variable_del('shopify_api_key');
   update_variable_del('shopify_api_secret');
-  update_variable_del('shopify_api_secret');
   update_variable_del('shopify_last_product_sync');
   update_variable_del('shopify_last_collection_sync');
   update_variable_del('shopify_cron_sync_products');

@@ -231,9 +231,9 @@ function shopify_admin_page() {
   }
   catch (Exception $e) {
     backdrop_set_message($e->getMessage(), 'error');
-    return t('<ul><li>Do you have a <a target="_blank" href="@signup">Shopify account</a>?</li><li>If you have an account you\'ll need to create your API key if you haven\'t already. See <a target="_blank" href="@api_key">https://docs.shopify.com/support/configuration/apps/where-do-i-find-my-api-key</a> for more information.</li><li>Have you checked your <a href="@api_config">API settings to make sure they match?</a></li><li><a href="@status_page">Can your server make outgoing HTTP requests?</li></ul>', array(
+    return t('<ul><li>Do you have a <a target="_blank" href="@signup">Shopify account</a>?</li><li>If you have an account you\'ll need to create your access token if you haven\'t already. See <a target="_blank" href="@access_token">https://docs.shopify.com/support/configuration/apps/where-do-i-find-my-api-key</a> for more information.</li><li>Have you checked your <a href="@api_config">API settings to make sure they match?</a></li><li><a href="@status_page">Can your server make outgoing HTTP requests?</li></ul>', array(
       '@signup' => url('https://www.shopify.com/?ref=bonify'),
-      '@api_key' => url('https://docs.shopify.com/support/configuration/apps/where-do-i-find-my-api-key'),
+      '@access_token' => url('https://shopify.dev/apps/auth/admin-app-access-tokens'),
       '@api_config' => url('admin/shopify/api'),
       '@status_page' => url('/admin/reports/status'),
     ));

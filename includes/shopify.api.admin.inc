@@ -31,11 +31,11 @@ function shopify_api_admin_settings($form, &$form_state) {
   );
   $form['connection']['api_token'] = array(
     '#type' => 'textfield',
-    '#title' => t('Token'),
+    '#title' => t('Admin API access token'),
     '#required' => TRUE,
     '#default_value' => $config->get('api_token'),
-    '#description' => t('This may be labeled as <em>Password</em> in the Shopify private apps console.'),
-  );
+    '#description' => t('This may be generated in the Shopify <strong>App development > API credentials</strong> console.'),
+);
   $form['connection']['api_key'] = array(
     '#type' => 'textfield',
     '#title' => t('API key'),
@@ -60,11 +60,11 @@ function shopify_api_admin_settings($form, &$form_state) {
     '#items' => array(
       t('Log in to your Shopify store in order to access the administration section.'),
       t('Click on "Apps" on the left-side menu.'),
-      t('Click "Private Apps" on the top-right of the page.'),
-      t('Enter a name for the application. This is private and the name does not matter.'),
-      t('Click "Save App".'),
-      t('Enter the "Password" as the "Token" value.'),
-      t('Enter the "API key" and "Secret" values.'),
+      t('Click "Develop apps" on the top-right of the page.'),
+      t('Click "Create an app" on the top-right of the page.'),
+      t('Enter a name for the application.'),
+      t('Click "Create app".'),
+      t('Copy the "Admin API access token" and enter it in the configuration settings here.'),
       t('Enter your Shopify store URL as the "Domain". It should be in the format of (store-name).myshopify.com.'),
       t('Click "Save configuration".'),
     ),

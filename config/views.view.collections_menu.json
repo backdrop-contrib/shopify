@@ -1,0 +1,88 @@
+{
+    "_config_name": "views.view.collections_menu",
+    "name": "collections_menu",
+    "description": "Default Collection menu listing view for Shopify module.",
+    "tag": "shopify",
+    "base_table": "taxonomy_term_data",
+    "human_name": "Collections Menu",
+    "module": "shopify",
+    "display": {
+        "default": {
+            "display_title": "Master",
+            "display_plugin": "default",
+            "display_options": {
+                "query": {
+                    "type": "views_query",
+                    "options": []
+                },
+                "title": "Collections",
+                "use_more_always": false,
+                "access": {
+                    "type": "perm",
+                    "perm": "view shopify products"
+                },
+                "cache": {
+                    "type": "none"
+                },
+                "exposed_form": {
+                    "type": "basic"
+                },
+                "pager": {
+                    "type": "none"
+                },
+                "style_plugin": "default",
+                "row_plugin": "fields",
+                "fields": {
+                    "name": {
+                        "id": "name",
+                        "table": "taxonomy_term_data",
+                        "field": "name",
+                        "label": "",
+                        "alter": {
+                            "word_boundary": false,
+                            "ellipsis": false
+                        },
+                        "link_to_taxonomy": true
+                    }
+                },
+                "filters": {
+                    "shopify_collection_published_at_value": {
+                        "id": "shopify_collection_published_at_value",
+                        "table": "field_data_shopify_collection_published_at",
+                        "field": "shopify_collection_published_at_value",
+                        "operator": ">",
+                        "value": {
+                            "value": "0"
+                        },
+                        "group": 1
+                    },
+                    "machine_name": {
+                        "id": "machine_name",
+                        "table": "taxonomy_vocabulary",
+                        "field": "machine_name",
+                        "value": {
+                            "shopify_collections": "shopify_collections"
+                        },
+                        "group": 1
+                    }
+                },
+                "filter_groups": {
+                    "operator": "AND",
+                    "groups": {
+                        "1": "AND"
+                    }
+                }
+            }
+        },
+        "block": {
+            "display_title": "Block",
+            "display_plugin": "block",
+            "display_options": {
+                "query": {
+                    "type": "views_query",
+                    "options": []
+                }
+            }
+        }
+    }
+}

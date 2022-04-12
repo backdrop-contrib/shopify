@@ -1624,7 +1624,7 @@ function shopify_get_text_format($selected = '') {
  */
 function theme_entity_property__shopify_product__body_html(&$variables) {
   // Get the raw HTML and run it through check_markup, rather than check_plain
-  // which is used in entity_property_default_render_value_by_type
+  // which is used in entity_plus_property_default_render_value_by_type
   $variables['content'] = check_markup($variables['elements']['#entity_wrapped']->{$variables['property_name']}->value(), shopify_get_text_format('full_html'));
   $output = '';
 

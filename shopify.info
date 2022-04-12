@@ -15,5 +15,5 @@ scripts[] = shopify.js
 stylesheets[all][] = css/shopify.css
 
 package = Shopify
-tags = ecommerce
+tags[] = ecommerce
 

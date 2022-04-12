@@ -19,17 +19,21 @@ module_load_include('inc', 'shopify', 'includes/shopify.rules');
 function shopify_taxonomy_term_view($term, $view_mode, $langcode) {
   if ($view_mode !== 'full') {
     return;
-  }
-  switch ($term->vocabulary_machine_name) {
-    case 'shopify_collections':
-      $uri = entity_uri('taxonomy_term', $term);
-      backdrop_goto($uri['path']);
-      break;
-    case 'shopify_tags':
-      $uri = entity_uri('taxonomy_term', $term);
-      backdrop_goto($uri['path']);
-      break;
-  }
+  } 
+
+  // The code below creates an infinite loop and breaks the site. Basically, when a taxonomy term is viewed,
+  // it invokes backdrop_goto to display the taxonomy term (again and again...) (?)
+
+  // switch ($term->vocabulary_machine_name) {
+  //   case 'shopify_collections':
+  //     $uri = entity_uri('taxonomy_term', $term);
+  //     backdrop_goto($uri['path']);
+  //     break;
+  //   case 'shopify_tags':
+  //     $uri = entity_uri('taxonomy_term', $term);
+  //     backdrop_goto($uri['path']);
+  //     break;
+  // }
 }
 
 /**
@@ -568,10 +572,21 @@ function shopify_sync_deleted_products(array $options = array()) {
   }
   $variant_ids = $product_ids = array();
 
-  for ($page = 1; $page <= ceil($product_count / $options['limit']); $page++) {
+  //for ($page = 1; $page <= ceil($product_count / $options['limit']); $page++) {
 
     // Setup default options for the products API call.
-    $options['page_info'] = $page;
+    
+    // There is an issue with how you are using page_info below. The Shopify API
+    // describes this as "page_info: A unique ID used to access a certain page of results."
+    // See https://shopify.dev/api/usage/pagination-rest
+    // The code here may be the result of an old REST API 
+    // There are several steps to get pagination. You need to get the Link header
+    // and extract the page tokens from there. 
+    // For the time being I have commented out all page related
+    // stuff in this function
+
+    // $options['page_info'] = $page;
+
     $options['fields'] = 'id,variants';
 
     // Build a list of all products in the Shopify system.
@@ -585,7 +600,7 @@ dpm($products);
         $variant_ids[] = $v['id'];
       }
     }
-  }
+  //}
 
   // Free up memory.
   unset($products);
@@ -846,8 +861,8 @@ function shopify_collection_sync_products($collection) {
         // Check if this collection is active.
         if ($collect->shopify_collection_published_at['und'][0]['value'] == 0) {
           // Remove this collection from the product.
-          $collections = array_filter($collections, ($c) ($collect){
-            $c->tid !== $collect->tid
+          $collections = array_filter($collections, function ($c, $collect){
+            $c->tid !== $collect->tid;
           });
           $product->wrapper()->shopify_product_collections->set($collections);
           $product->wrapper()->save();

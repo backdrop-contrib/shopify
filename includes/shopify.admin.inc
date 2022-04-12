@@ -43,7 +43,7 @@ function shopify_admin_theme_download($form, $form_state) {
   );
 
   $protocol = stripos($_SERVER['SERVER_PROTOCOL'], 'https') === TRUE ? 'https://' : 'http://';
-  $fqdn = $protocol . "$_SERVER [HTTP_HOST]";
+  $fqdn = $protocol . $_SERVER['HTTP_HOST'];
   $form['download']['hostname'] = array(
     '#type' => 'textfield',
     '#title' => t('Hostname'),

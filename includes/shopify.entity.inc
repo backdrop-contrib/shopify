@@ -282,6 +282,7 @@ class ShopifyProduct extends Entity implements EntityInterface {
         $values['options'] = serialize($values['options']);
       }
     }
+    $this->setUp();
     parent::__construct($values, 'shopify_product');
     if (!empty($values)) {
       $this->setTerms();

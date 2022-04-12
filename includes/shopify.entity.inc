@@ -34,11 +34,11 @@ class ShopifyProduct extends Entity implements EntityInterface {
    */
   public function wrapper() {
     if (empty($this->wrapper)) {
-      $this->wrapper = entity_metadata_wrapper($this->entityType, $this);
+      $this->wrapper = entity_metadata_wrapper($this->entityType(), $this);
     }
     elseif ($this->wrapper->value() !== $this) {
       // Wrapper has been modified outside, so we'd better create a new one.
-      $this->wrapper = entity_metadata_wrapper($this->entityType, $this);
+      $this->wrapper = entity_metadata_wrapper($this->entityType(), $this);
     }
     return $this->wrapper;
   }
@@ -287,6 +287,7 @@ class ShopifyProduct extends Entity implements EntityInterface {
       $this->setTerms();
       $this->setImages();
     }
+    $this->entityType = 'shopify_product';
   }
 
   /**
@@ -333,7 +334,20 @@ class ShopifyProduct extends Entity implements EntityInterface {
     if (!is_array($this->option_values) && isset($this->option_values)) {
       $this->option_values = unserialize($this->option_values);
     }
-    parent::setUp();
+
+    // Backdrop's core Entity class doesn't provide the setUp method
+    // Instead, you have to use setUp from D7 Entity API, since 
+    // Entity Plus doesn't provide an EntityPlus class.
+
+    //parent::setUp();
+
+    $this->entityInfo = entity_get_info($this->entityType);
+    $this->idKey = $this->entityInfo['entity keys']['id'];
+    // ['entity keys']['name'] is only used for configuration entities that store the machine name of the bundle they define. 
+    // For content entities, this is the same as idKey 
+    $this->nameKey = isset($this->entityInfo['entity keys']['name']) ? $this->entityInfo['entity keys']['name'] : $this->idKey;
+    // ['entity keys']['status'] is only used for configuration entities
+    $this->statusKey = empty($this->entityInfo['entity keys']['status']) ? 'status' : $this->entityInfo['entity keys']['status'];
   }
 
   /**

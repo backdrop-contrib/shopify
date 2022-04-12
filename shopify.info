@@ -5,6 +5,7 @@ type = module
 configure = admin/shopify/api
 
 dependencies[] = entity_plus
+dependencies[] = entity_ui
 dependencies[] = image
 dependencies[] = date
 dependencies[] = views

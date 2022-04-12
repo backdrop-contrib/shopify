@@ -28,6 +28,8 @@ This module is in no way an official project of Shopify.
 ## Dependencies
 
 - A Shopify subscription is required.
+- Entity Plus
+- Entity UI
 - @todo Pathauto Entity (https://www.drupal.org/project/pathauto_entity) is recommended.
 
 ## Issues

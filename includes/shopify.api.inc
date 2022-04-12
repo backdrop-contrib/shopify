@@ -78,10 +78,6 @@ function shopify_api_call($method, $path, array $params = array()) {
   if (shopify_api_call_limit_reached($client)) {
     config_set('shopify.settings', 'api_next_timeout', shopify_api_get_next_timeout());
   }
-  // dpm(__FUNCTION__);
-  // dpm($method);
-  // dpm('/admin/' . $path . '.json');
-  // dpm($params);
   if (!empty($result['body']->container[$path])) {
     return $result['body']->container[$path];
   }

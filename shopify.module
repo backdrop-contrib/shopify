@@ -19,7 +19,7 @@ module_load_include('inc', 'shopify', 'includes/shopify.rules');
 function shopify_taxonomy_term_view($term, $view_mode, $langcode) {
   if ($view_mode !== 'full') {
     return;
-  } 
+  }
 
   // The code below creates an infinite loop and breaks the site. Basically, when a taxonomy term is viewed,
   // it invokes backdrop_goto to display the taxonomy term (again and again...) (?)
@@ -575,13 +575,13 @@ function shopify_sync_deleted_products(array $options = array()) {
   //for ($page = 1; $page <= ceil($product_count / $options['limit']); $page++) {
 
     // Setup default options for the products API call.
-    
+
     // There is an issue with how you are using page_info below. The Shopify API
     // describes this as "page_info: A unique ID used to access a certain page of results."
     // See https://shopify.dev/api/usage/pagination-rest
-    // The code here may be the result of an old REST API 
+    // The code here may be the result of an old REST API
     // There are several steps to get pagination. You need to get the Link header
-    // and extract the page tokens from there. 
+    // and extract the page tokens from there.
     // For the time being I have commented out all page related
     // stuff in this function
 
@@ -591,8 +591,6 @@ function shopify_sync_deleted_products(array $options = array()) {
 
     // Build a list of all products in the Shopify system.
     $products = shopify_api_get_products($options);
-  dpm(__FUNCTION__);
-dpm($products);
     // Merge all variants for these products.
     foreach ($products as $p) {
       $product_ids[] = $p['id'];

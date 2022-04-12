@@ -633,8 +633,6 @@ function shopify_sync_products_batch_op($pagenum, $num_per_batch, $operation_det
       'updated_at_min' => config_get('shopify.settings', 'last_product_sync'),
     )
   );
-  dpm(__FUNCTION__);
-  dpm($products);
   if (!empty($products)) {
     foreach ($products as $product) {
       $shopify_product = shopify_product_update($product['id'], 0, $product);

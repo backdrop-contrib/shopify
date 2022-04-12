@@ -336,15 +336,15 @@ class ShopifyProduct extends Entity implements EntityInterface {
     }
 
     // Backdrop's core Entity class doesn't provide the setUp method
-    // Instead, you have to use setUp from D7 Entity API, since 
+    // Instead, you have to use setUp from D7 Entity API, since
     // Entity Plus doesn't provide an EntityPlus class.
 
     //parent::setUp();
 
     $this->entityInfo = entity_get_info($this->entityType);
     $this->idKey = $this->entityInfo['entity keys']['id'];
-    // ['entity keys']['name'] is only used for configuration entities that store the machine name of the bundle they define. 
-    // For content entities, this is the same as idKey 
+    // ['entity keys']['name'] is only used for configuration entities that store the machine name of the bundle they define.
+    // For content entities, this is the same as idKey
     $this->nameKey = isset($this->entityInfo['entity keys']['name']) ? $this->entityInfo['entity keys']['name'] : $this->idKey;
     // ['entity keys']['status'] is only used for configuration entities
     $this->statusKey = empty($this->entityInfo['entity keys']['status']) ? 'status' : $this->entityInfo['entity keys']['status'];
@@ -582,7 +582,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Unique product identifier from Shopify.'),
       'schema field' => 'id',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['variant_id'] = array(
       'label' => t('Variant ID'),
@@ -590,7 +590,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Unique variant identifier from Shopify.'),
       'schema field' => 'variant_id',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['title'] = array(
       'label' => t('Title'),
@@ -598,7 +598,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Name of the product.'),
       'schema field' => 'title',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['handle'] = array(
       'label' => t('Handle'),
@@ -606,7 +606,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Product handle from Shopify'),
       'schema field' => 'handle',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['product_type'] = array(
       'label' => t('Product Type'),
@@ -614,7 +614,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Type of product.'),
       'schema field' => 'product_type',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['published_scope'] = array(
       'label' => t('Published Scope'),
@@ -622,7 +622,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Product published scope from Shopify'),
       'schema field' => 'published_scope',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['vendor'] = array(
       'label' => t('Vendor'),
@@ -630,7 +630,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Vendor of the product.'),
       'schema field' => 'vendor',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['barcode'] = array(
       'label' => t('Barcode'),
@@ -638,7 +638,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Barcode of the product.'),
       'schema field' => 'barcode',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['compare_at_price'] = array(
       'label' => t('Compare at Price'),
@@ -646,7 +646,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Compare price of the product.'),
       'schema field' => 'compare_at_price',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['fulfillment_service'] = array(
       'label' => t('Fulfillment Service'),
@@ -654,7 +654,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Fulfillment service of the product.'),
       'schema field' => 'fulfillment_service',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['grams'] = array(
       'label' => t('Grams'),
@@ -662,7 +662,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Weight of the product in grams.'),
       'schema field' => 'grams',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['inventory_management'] = array(
       'label' => t('Inventory Management'),
@@ -670,7 +670,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Inventory management setting for the product.'),
       'schema field' => 'inventory_management',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['inventory_policy'] = array(
       'label' => t('Inventory Policy'),
@@ -678,7 +678,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Inventory policy of the product.'),
       'schema field' => 'inventory_policy',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['inventory_quantity'] = array(
       'label' => t('Inventory Quantity'),
@@ -686,7 +686,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Inventory quantity of the product.'),
       'schema field' => 'inventory_quantity',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['requires_shipping'] = array(
       'label' => t('Requires Shipping'),
@@ -694,7 +694,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Whether the product requires shipping or not.'),
       'schema field' => 'requires_shipping',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['sku'] = array(
       'label' => t('SKU'),
@@ -702,7 +702,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('SKU of the product.'),
       'schema field' => 'sku',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['taxable'] = array(
       'label' => t('Taxable'),
@@ -710,7 +710,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Whether the product is taxable or not.'),
       'schema field' => 'taxable',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['weight'] = array(
       'label' => t('Weight'),
@@ -718,7 +718,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Weight of the product.'),
       'schema field' => 'weight',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['weight_unit'] = array(
       'label' => t('Weight Unit'),
@@ -726,7 +726,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Name of the product.'),
       'schema field' => 'title',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     $info[$this->type]['properties']['body_html'] = array(
       'label' => t('Body'),
@@ -734,7 +734,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('Product body HTML from Shopify.'),
       'schema field' => 'body_html',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
     // @todo price is on variants not on products, update with variant info
     $info[$this->type]['properties']['price'] = array(
@@ -743,7 +743,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('The product price.'),
       'schema field' => 'price',
       'setter callback' => 'entity_property_verbatim_set',
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_plus_property_verbatim_get',
     );
 
     return $info;

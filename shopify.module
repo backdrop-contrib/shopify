@@ -1592,10 +1592,10 @@ function shopify_taxonomy_collection_term_uri($term) {
 function shopify_theme($existing, $type, $theme, $path) {
   return array(
     'entity_property__shopify_product__body_html' => array(
-      'base hook' => 'entity_property',
+      'base hook' => 'entity_plus_property',
     ),
     'entity_property__shopify_product__price' => array(
-      'base hook' => 'entity_property',
+      'base hook' => 'entity_plus_property',
     ),
   );
 }

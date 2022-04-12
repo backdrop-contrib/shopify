@@ -55,7 +55,7 @@ class ShopifyProduct extends Entity implements EntityInterface {
    */
   public function uri() {
     return array(
-      'path' => 'shopify_product/' . $this->id(),
+      'path' => 'product/' . $this->id(),
       'options' => array(),
     );
   }

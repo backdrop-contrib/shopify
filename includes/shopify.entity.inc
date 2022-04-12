@@ -47,7 +47,7 @@ class ShopifyProduct extends Entity implements EntityInterface {
    * Implements EntityInterface::label().
    */
   public function label() {
-    return 'label';
+    return $this->title;
   }
 
   /**

@@ -282,13 +282,13 @@ class ShopifyProduct extends Entity implements EntityInterface {
         $values['options'] = serialize($values['options']);
       }
     }
+    $this->entityType = 'shopify_product';
     $this->setUp();
     parent::__construct($values, 'shopify_product');
     if (!empty($values)) {
       $this->setTerms();
       $this->setImages();
     }
-    $this->entityType = 'shopify_product';
   }
 
   /**
@@ -325,6 +325,14 @@ class ShopifyProduct extends Entity implements EntityInterface {
    * Set up the object instance on construction or unserializiation.
    */
   public function setUp() {
+    $this->entityInfo = entity_get_info($this->entityType);
+    $this->idKey = $this->entityInfo['entity keys']['id'];
+    // ['entity keys']['name'] is only used for configuration entities that store the machine name of the bundle they define.
+    // For content entities, this is the same as idKey
+    $this->nameKey = isset($this->entityInfo['entity keys']['name']) ? $this->entityInfo['entity keys']['name'] : $this->idKey;
+    // ['entity keys']['status'] is only used for configuration entities
+    $this->statusKey = empty($this->entityInfo['entity keys']['status']) ? 'status' : $this->entityInfo['entity keys']['status'];
+
     if (!$this->variant_id) {
       // This is a regular product, need to load sub-variants.
       $this->variants = $this->loadVariants();
@@ -335,20 +343,6 @@ class ShopifyProduct extends Entity implements EntityInterface {
     if (!is_array($this->option_values) && isset($this->option_values)) {
       $this->option_values = unserialize($this->option_values);
     }
-
-    // Backdrop's core Entity class doesn't provide the setUp method
-    // Instead, you have to use setUp from D7 Entity API, since
-    // Entity Plus doesn't provide an EntityPlus class.
-
-    //parent::setUp();
-
-    $this->entityInfo = entity_get_info($this->entityType);
-    $this->idKey = $this->entityInfo['entity keys']['id'];
-    // ['entity keys']['name'] is only used for configuration entities that store the machine name of the bundle they define.
-    // For content entities, this is the same as idKey
-    $this->nameKey = isset($this->entityInfo['entity keys']['name']) ? $this->entityInfo['entity keys']['name'] : $this->idKey;
-    // ['entity keys']['status'] is only used for configuration entities
-    $this->statusKey = empty($this->entityInfo['entity keys']['status']) ? 'status' : $this->entityInfo['entity keys']['status'];
   }
 
   /**

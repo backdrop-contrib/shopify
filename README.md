@@ -45,6 +45,7 @@ This module is in no way an official project of Shopify.
 
  - Ported to BackdropCMS by [Laryn Kragt Bakker](https://github.com/laryn) - [CEDC.org](https://cedc.org)
  - This Backdrop module merges and updates two Drupal 7 modules: `shopify_api` and `shopify`.
+ - The ([Basic-Shopify-API](https://github.com/osiset/Basic-Shopify-API)) by [osiset](https://github.com/osiset) is bundled. It has been released under the MIT license.
  - Maintained for Drupal 7 by [donutdan4114](https://github.com/donutdan4114).
  - Originally developed by [Bonify, LLC](http://bonify.io).
 

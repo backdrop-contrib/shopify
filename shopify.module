@@ -1673,30 +1673,6 @@ function theme_entity_property__shopify_product__price(&$variables) {
 }
 
 /**
- * Implements hook_image_default_styles().
- */
-function shopify_image_default_styles() {
-  $styles = array();
-
-  $styles['shopify_product_thumbnail'] = array(
-    'label' => 'Shopify Product Thumbnail',
-    'effects' => array(
-      array(
-        'name' => 'image_scale',
-        'data' => array(
-          'width' => 150,
-          'height' => 0,
-          'upscale' => 0,
-        ),
-        'weight' => 0,
-      ),
-    ),
-  );
-
-  return $styles;
-}
-
-/**
  * Implements hook_block_info().
  */
 function shopify_block_info() {

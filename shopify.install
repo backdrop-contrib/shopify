@@ -294,7 +294,7 @@ function shopify_install() {
         'type' => 'image',
         'weight' => '0',
         'settings' => array(
-          'image_style' => 'shopify_product_thumbnail',
+          'image_style' => 'medium',
           'image_link' => '',
         ),
         'module' => 'image',

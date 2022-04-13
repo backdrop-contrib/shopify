@@ -11,7 +11,7 @@
  * This controller suites best for managing configuration entities.
  * For a controller suiting content entities, see ShopifyEntityContentUIController.
  */
-class ShopifyEntityDefaultUIController {
+class ShopifyEntityDefaultUIController extends EntityDefaultUIController {
 
   protected $entityType;
   protected $entityInfo, $path;
@@ -44,9 +44,9 @@ class ShopifyEntityDefaultUIController {
       'page callback' => 'backdrop_get_form',
       'page arguments' => array($this->entityType . '_overview_form', $this->entityType),
       'description' => 'Manage ' . $plural_label . '.',
-      'access callback' => 'entity_access',
+      'access callback' => 'entity_plus_access',
       'access arguments' => array('view', $this->entityType),
-      'file' => 'includes/entity.ui.inc',
+      'file' => 'entity.ui.inc',
     );
     $items[$this->path . '/list'] = array(
       'title' => 'List',
@@ -58,7 +58,7 @@ class ShopifyEntityDefaultUIController {
       'title arguments' => array('add', $this->entityType),
       'page callback' => 'entity_ui_get_form',
       'page arguments' => array($this->entityType, NULL, 'add'),
-      'access callback' => 'entity_access',
+      'access callback' => 'entity_plus_access',
       'access arguments' => array('create', $this->entityType),
       'type' => MENU_LOCAL_ACTION,
     );
@@ -69,7 +69,7 @@ class ShopifyEntityDefaultUIController {
       'page callback' => 'entity_ui_get_form',
       'page arguments' => array($this->entityType, $this->id_count + 1),
       'load arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
+      'access callback' => 'entity_plus_access',
       'access arguments' => array('update', $this->entityType, $this->id_count + 1),
     );
     $items[$this->path . '/manage/' . $wildcard . '/edit'] = array(
@@ -84,7 +84,7 @@ class ShopifyEntityDefaultUIController {
       'page callback' => 'entity_ui_get_form',
       'page arguments' => array($this->entityType, $this->id_count + 1, 'clone'),
       'load arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
+      'access callback' => 'entity_plus_access',
       'access arguments' => array('create', $this->entityType),
     );
     // Menu item for operations like revert and delete.
@@ -92,7 +92,7 @@ class ShopifyEntityDefaultUIController {
       'page callback' => 'backdrop_get_form',
       'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $this->id_count + 1, $this->id_count + 2),
       'load arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
+      'access callback' => 'entity_plus_access',
       'access arguments' => array('delete', $this->entityType, $this->id_count + 1),
       'file' => 'includes/entity.ui.inc',
     );
@@ -104,7 +104,7 @@ class ShopifyEntityDefaultUIController {
         'title arguments' => array('import', $this->entityType),
         'page callback' => 'backdrop_get_form',
         'page arguments' => array($this->entityType . '_operation_form', $this->entityType, NULL, 'import'),
-        'access callback' => 'entity_access',
+        'access callback' => 'entity_plus_access',
         'access arguments' => array('create', $this->entityType),
         'file' => 'includes/entity.ui.inc',
         'type' => MENU_LOCAL_ACTION,
@@ -224,7 +224,7 @@ class ShopifyEntityDefaultUIController {
 
     $rows = array();
     foreach ($entities as $entity) {
-      $rows[] = $this->overviewTableRow($conditions, entity_id($this->entityType, $entity), $entity);
+      $rows[] = $this->overviewTableRow($conditions, entity_plus_id($this->entityType, $entity), $entity);
     }
 
     $render = array(
@@ -274,7 +274,7 @@ class ShopifyEntityDefaultUIController {
     $row[] = array('data' => array(
       '#theme' => 'entity_ui_overview_item',
       '#label' => entity_label($this->entityType, $entity),
-      '#name' => !empty($this->entityInfo['exportable']) ? entity_id($this->entityType, $entity) : FALSE,
+      '#name' => !empty($this->entityInfo['exportable']) ? entity_plus_id($this->entityType, $entity) : FALSE,
       '#url' => $entity_uri ? $entity_uri : FALSE,
       '#entity_type' => $this->entityType),
     );
@@ -299,7 +299,7 @@ class ShopifyEntityDefaultUIController {
     $i18n = !empty($this->entityInfo['i18n controller class']);
 
     // Add operations depending on the status.
-    if (entity_has_status($this->entityType, $entity, ENTITY_FIXED)) {
+    if (entity_plus_has_status($this->entityType, $entity, ENTITY_FIXED)) {
       $row[] = array('data' => l(t('clone'), $this->path . '/manage/' . $id . '/clone'), 'colspan' => $this->operationCount());
     }
     else {
@@ -316,10 +316,10 @@ class ShopifyEntityDefaultUIController {
         $row[] = l(t('clone'), $this->path . '/manage/' . $id . '/clone');
       }
 
-      if (empty($this->entityInfo['exportable']) || !entity_has_status($this->entityType, $entity, ENTITY_IN_CODE)) {
+      if (empty($this->entityInfo['exportable']) || !entity_plus_has_status($this->entityType, $entity, ENTITY_IN_CODE)) {
         $row[] = l(t('delete'), $this->path . '/manage/' . $id . '/delete', array('query' => backdrop_get_destination()));
       }
-      elseif (entity_has_status($this->entityType, $entity, ENTITY_OVERRIDDEN)) {
+      elseif (entity_plus_has_status($this->entityType, $entity, ENTITY_OVERRIDDEN)) {
         $row[] = l(t('revert'), $this->path . '/manage/' . $id . '/revert', array('query' => backdrop_get_destination()));
       }
       else {
@@ -396,7 +396,7 @@ class ShopifyEntityDefaultUIController {
         $form_state[$this->entityType] = $entity;
         if (!$form_state['values']['overwrite']) {
           // Check for existing entities with the same identifier.
-          $id = entity_id($this->entityType, $entity);
+          $id = entity_plus_id($this->entityType, $entity);
           $entities = entity_load($this->entityType, array($id));
           if (!empty($entities)) {
             $label = entity_label($this->entityType, $entity);
@@ -437,7 +437,7 @@ class ShopifyEntityDefaultUIController {
   public function applyOperation($op, $entity) {
     $label = entity_label($this->entityType, $entity);
     $vars = array('%entity' => $this->entityInfo['label'], '%label' => $label);
-    $id = entity_id($this->entityType, $entity);
+    $id = entity_plus_id($this->entityType, $entity);
     $edit_link = l(t('edit'), $this->path . '/manage/' . $id . '/edit');
 
     switch ($op) {
@@ -453,7 +453,7 @@ class ShopifyEntityDefaultUIController {
 
       case 'import':
         // First check if there is any existing entity with the same ID.
-        $id = entity_id($this->entityType, $entity);
+        $id = entity_plus_id($this->entityType, $entity);
         $entities = entity_load($this->entityType, array($id));
         if ($existing_entity = reset($entities)) {
           // Copy DB id and remove the new indicator to overwrite the DB record.
@@ -530,7 +530,7 @@ class ShopifyEntityContentUIController extends ShopifyEntityDefaultUIController 
       'page callback' => 'entity_ui_entity_page_view',
       'page arguments' => array($this->id_count),
       'load arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
+      'access callback' => 'entity_plus_access',
       'access arguments' => array('view', $this->entityType, $this->id_count),
     ) + $defaults;
     $items[$this->path . '/' . $wildcard . '/view'] = array(
@@ -543,7 +543,7 @@ class ShopifyEntityContentUIController extends ShopifyEntityDefaultUIController 
       'page callback' => 'entity_ui_get_form',
       'page arguments' => array($this->entityType, $this->id_count),
       'load arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
+      'access callback' => 'entity_plus_access',
       'access arguments' => array('edit', $this->entityType, $this->id_count),
       'title' => 'Edit',
       'type' => MENU_LOCAL_TASK,
@@ -553,7 +553,7 @@ class ShopifyEntityContentUIController extends ShopifyEntityDefaultUIController 
       'page callback' => 'backdrop_get_form',
       'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $this->id_count, 'delete'),
       'load arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
+      'access callback' => 'entity_plus_access',
       'access arguments' => array('delete', $this->entityType, $this->id_count),
       'title' => 'Delete',
       'type' => MENU_LOCAL_TASK,
@@ -596,7 +596,7 @@ class ShopifyEntityBundleableUIController extends ShopifyEntityContentUIControll
       'title arguments' => array('add', $this->entityType),
       'page callback' => 'entity_ui_bundle_add_page',
       'page arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
+      'access callback' => 'entity_plus_access',
       'access arguments' => array('create', $this->entityType),
       'type' => MENU_LOCAL_ACTION,
     );
@@ -605,7 +605,7 @@ class ShopifyEntityBundleableUIController extends ShopifyEntityContentUIControll
       'title arguments' => array('add', $this->entityType, $this->id_count + 1),
       'page callback' => 'entity_ui_get_bundle_add_form',
       'page arguments' => array($this->entityType, $this->id_count + 1),
-      'access callback' => 'entity_access',
+      'access callback' => 'entity_plus_access',
       'access arguments' => array('create', $this->entityType),
     );
 
@@ -766,4 +766,144 @@ function shopify_theme_entity_ui_overview_item($variables) {
     $output .= ' <small>(' . t('Machine name') . ': ' . check_plain($variables['name']) . ')</small>';
   }
   return $output;
+}
+
+
+/**
+ * Class ShopifyProductsUIController
+ */
+class ShopifyProductsUIController extends ShopifyEntityDefaultUIController {
+
+  /**
+   * Builds the entity overview form.
+   */
+  public function overviewForm($form, &$form_state) {
+    // Only show products, not variants.
+    $conditions = array('variant_id' => 0);
+    $form['table'] = $this->overviewTable($conditions);
+    $form['pager'] = array('#theme' => 'pager');
+    return $form;
+  }
+
+  /**
+   * Generates the render array for a overview table for arbitrary entities
+   * matching the given conditions.
+   *
+   * @param $conditions
+   *   An array of conditions as needed by entity_load().
+   * @return Array
+   *   A renderable array.
+   */
+  public function overviewTable($conditions = array()) {
+
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', $this->entityType);
+
+    // Add all conditions to query.
+    foreach ($conditions as $key => $value) {
+      $query->propertyCondition($key, $value);
+    }
+
+    if ($this->overviewPagerLimit) {
+      $query->pager($this->overviewPagerLimit);
+    }
+
+    $results = $query->execute();
+
+    $ids = isset($results[$this->entityType])?array_keys($results[$this->entityType]) : array();
+    $entities = $ids?entity_load($this->entityType, $ids) : array();
+    ksort($entities);
+
+    $rows = array();
+    foreach ($entities as $entity) {
+      $shopify_link = l(t('Edit on Shopify'), shopify_api_get_product_path($entity->product_id), array('attributes' => array('target' => '_blank')));
+      $rows[] = $this->overviewTableRow($conditions, entity_plus_id($this->entityType, $entity), $entity, array($shopify_link));
+    }
+    $render = array(
+      '#theme' => 'table',
+      '#header' => $this->overviewTableHeaders($conditions, $rows),
+      '#rows' => $rows,
+      '#empty' => t('None.'),
+    );
+    return $render;
+  }
+
+  /**
+   * Generates the row for the passed entity and may be overridden in order to
+   * customize the rows.
+   *
+   * @param $additional_cols
+   *   Additional columns to be added after the entity label column.
+   */
+  protected function overviewTableRow($conditions, $id, $entity, $additional_cols = array()) {
+    $entity_uri = entity_uri($this->entityType, $entity);
+
+    $row[] = array(
+      'data' => array(
+        '#theme' => 'entity_ui_overview_item',
+        '#label' => entity_label($this->entityType, $entity),
+        '#name' => !empty($this->entityInfo['exportable']) ? entity_plus_id($this->entityType, $entity) : FALSE,
+        '#url' => $entity_uri ? $entity_uri : FALSE,
+        '#entity_type' => $this->entityType,
+      ),
+    );
+
+    // Add in any passed additional cols.
+    foreach ($additional_cols as $col) {
+      $row[] = $col;
+    }
+
+    // Add a row for the exportable status.
+    if (!empty($this->entityInfo['exportable'])) {
+      $row[] = array(
+        'data' => array(
+          '#theme' => 'entity_status',
+          '#status' => $entity->{$this->statusKey},
+        ),
+      );
+    }
+    // In case this is a bundle, we add links to the field ui tabs.
+    $field_ui = !empty($this->entityInfo['bundle of']) && entity_type_is_fieldable($this->entityInfo['bundle of']) && module_exists('field_ui');
+    // For exportable entities we add an export link.
+    $exportable = !empty($this->entityInfo['exportable']);
+    // If i18n integration is enabled, add a link to the translate tab.
+    $i18n = !empty($this->entityInfo['i18n controller class']);
+
+    // Add operations depending on the status.
+    if (entity_plus_has_status($this->entityType, $entity, ENTITY_FIXED)) {
+      $row[] = array(
+        'data' => l(t('clone'), $this->path . '/manage/' . $id . '/clone'),
+        'colspan' => $this->operationCount(),
+      );
+    }
+    else {
+      $row[] = l(t('Edit Backdrop Entity'), $this->path . '/manage/' . $id);
+
+      if ($field_ui) {
+        $row[] = l(t('manage fields'), $this->path . '/manage/' . $id . '/fields');
+        $row[] = l(t('manage display'), $this->path . '/manage/' . $id . '/display');
+      }
+      if ($i18n) {
+        $row[] = l(t('translate'), $this->path . '/manage/' . $id . '/translate');
+      }
+      if ($exportable) {
+        $row[] = l(t('clone'), $this->path . '/manage/' . $id . '/clone');
+      }
+      if (entity_plus_has_status($this->entityType, $entity, ENTITY_OVERRIDDEN)) {
+        $row[] = l(t('revert'), $this->path . '/manage/' . $id . '/revert', array('query' => backdrop_get_destination()));
+      }
+    }
+    if ($exportable) {
+      $row[] = l(t('export'), $this->path . '/manage/' . $id . '/export');
+    }
+    return $row;
+  }
+
+//  public function hook_menu() {
+//    parent::hook_menu();
+//    // @todo Add a nice page callback to point at Shopify's add product page.
+  // @todo Remove the Delete callback.
+  // @todo Remove the Add callback
+//  }
+
 }

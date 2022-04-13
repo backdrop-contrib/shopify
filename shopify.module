@@ -1811,10 +1811,10 @@ function shopify_ctools_plugin_api($owner, $client) {
 function shopify_autoload_info() {
   return array(
     'ShopifyEntityDefaultUIController' => 'includes/shopify.entity.ui.inc',
+    'ShopifyProductsUIController' => 'includes/shopify.entity.ui.inc',
     'ShopifyProduct' => 'includes/shopify.entity.inc',
     'ShopifyProductController' => 'includes/shopify.entity.inc',
     'ShopifyProductMetadataController' => 'includes/shopify.entity.inc',
-    'ShopifyProductsUIController' => 'includes/shopify.entity.inc',
     'ShopifyProductViewsController' => 'includes/shopify.entity.inc',
     'views_handler_field_shopify_price' => 'views/views_handler_field_shopify_price.inc',
     'views_handler_field_shopify_product' => 'views/views_handler_field_shopify_product.inc',

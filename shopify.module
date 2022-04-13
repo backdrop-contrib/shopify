@@ -1733,7 +1733,9 @@ function shopify_form_shopify_product_form_alter(&$form, &$form_state, $hook) {
   $edit_url = shopify_api_get_product_path($product->product_id, $product->variant_id);
 
   $form['help'] = array(
-    '#markup' => t('Product data synced with Shopify is not editable. Edit those fields on Shopify instead. <a href="!edit_url" target="_blank">!edit_url</a>', array('!edit_url' => $edit_url)),
+    '#prefix' => '<div class="messages info">',
+    '#markup' => t('Product data synced with Shopify is not editable. <a href="!edit_url" target="_blank">Edit those fields on Shopify instead</a>.', array('!edit_url' => $edit_url)),
+    '#suffix' => '</div>',
     '#weight' => -99,
   );
 

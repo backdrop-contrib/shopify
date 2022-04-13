@@ -1591,10 +1591,10 @@ function shopify_taxonomy_collection_term_uri($term) {
  */
 function shopify_theme($existing, $type, $theme, $path) {
   return array(
-    'entity_property__shopify_product__body_html' => array(
+    'entity_plus_property__shopify_product__body_html' => array(
       'base hook' => 'entity_plus_property',
     ),
-    'entity_property__shopify_product__price' => array(
+    'entity_plus_property__shopify_product__price' => array(
       'base hook' => 'entity_plus_property',
     ),
   );
@@ -1622,7 +1622,7 @@ function shopify_get_text_format($selected = '') {
  * @param $variables
  * @return string
  */
-function theme_entity_property__shopify_product__body_html(&$variables) {
+function theme_entity_plus_property__shopify_product__body_html(&$variables) {
   // Get the raw HTML and run it through check_markup, rather than check_plain
   // which is used in entity_plus_property_default_render_value_by_type
   $variables['content'] = check_markup($variables['elements']['#entity_plus_wrapped']->{$variables['property_name']}->value(), shopify_get_text_format('full_html'));
@@ -1649,7 +1649,7 @@ function theme_entity_property__shopify_product__body_html(&$variables) {
  * @param $variables
  * @return string
  */
-function theme_entity_property__shopify_product__price(&$variables) {
+function theme_entity_plus_property__shopify_product__price(&$variables) {
   if ($variables['content']) {
     $variables['content'] = shopify_money_format() . $variables['content'];
   }

@@ -521,7 +521,7 @@ class ShopifyProductController extends EntityPlusController {
       // Overrridden to hide labels by default
       '#label_hidden' => FALSE,
       '#label' => $info['label'],
-      '#entity_wrapped' => $wrapper,
+      '#entity_plus_wrapped' => $wrapper,
       '#theme' => 'entity_plus_property',
       '#property_name' => $name,
       '#access' => $property->access('view'),
@@ -551,7 +551,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('When the product was last updated.'),
       'schema field' => 'updated_at',
       'setter callback' => 'entity_property_verbatim_date_set',
-      'getter callback' => 'entity_property_verbatim_date_get',
+      'getter callback' => 'entity_plus_property_verbatim_date_get',
     );
     $info[$this->type]['properties']['created_at'] = array(
       'label' => t('Created Date'),
@@ -559,7 +559,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('When the product was created.'),
       'schema field' => 'created_at',
       'setter callback' => 'entity_property_verbatim_date_set',
-      'getter callback' => 'entity_property_verbatim_date_get',
+      'getter callback' => 'entity_plus_property_verbatim_date_get',
     );
     $info[$this->type]['properties']['published_at'] = array(
       'label' => t('Published Date'),
@@ -567,7 +567,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('When the product was published.'),
       'schema field' => 'published_at',
       'setter callback' => 'entity_property_verbatim_date_set',
-      'getter callback' => 'entity_property_verbatim_date_get',
+      'getter callback' => 'entity_plus_property_verbatim_date_get',
     );
     $info[$this->type]['properties']['product_id'] = array(
       'label' => t('Product ID'),

@@ -1635,14 +1635,14 @@ function theme_entity_plus_property__shopify_product__body_html(&$variables) {
 
   // Render the content.
   $content_suffix = '';
-  if (!$variables['label_hidden'] || $variables['content_attributes']) {
-    $output .= '<div' . $variables['content_attributes'] . '>';
+  if (!$variables['label_hidden'] || $variables['content_attributes_array']) {
+    $output .= '<div' . backdrop_attributes($variables['content_attributes_array']) . '>';
     $content_suffix = '</div>';
   }
   $output .= $variables['content'] . $content_suffix;
 
   // Render the top-level DIV.
-  return '<div' . $variables['attributes'] . '>' . $output . '</div>';
+  return '<div' . backdrop_attributes($variables['attributes_array']) . '>' . $output . '</div>';
 }
 
 /**
@@ -1657,19 +1657,19 @@ function theme_entity_plus_property__shopify_product__price(&$variables) {
 
   // Render the label, if it's not hidden.
   if (!$variables['label_hidden']) {
-    $output .= '<div' . $variables['title_attributes'] . '>' . $variables['label'] . ':&nbsp;</div>';
+    $output .= '<div' . backdrop_attributes($variables['title_attributes_array']) . '>' . $variables['label'] . ':&nbsp;</div>';
   }
 
   // Render the content.
   $content_suffix = '';
-  if (!$variables['label_hidden'] || $variables['content_attributes']) {
-    $output .= '<div' . $variables['content_attributes'] . '>';
+  if (!$variables['label_hidden'] || $variables['content_attributes_array']) {
+    $output .= '<div' . backdrop_attributes($variables['content_attributes_array']) . '>';
     $content_suffix = '</div>';
   }
   $output .= $variables['content'] . $content_suffix;
 
   // Render the top-level DIV.
-  return '<div' . $variables['attributes'] . '>' . $output . '</div>';
+  return '<div' . backdrop_attributes($variables['attributes_array']) . '>' . $output . '</div>';
 }
 
 /**

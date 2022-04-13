@@ -1591,10 +1591,10 @@ function shopify_taxonomy_collection_term_uri($term) {
  */
 function shopify_theme($existing, $type, $theme, $path) {
   return array(
-    'entity_property__shopify_product__body_html' => array(
+    'entity_plus_property__shopify_product__body_html' => array(
       'base hook' => 'entity_plus_property',
     ),
-    'entity_property__shopify_product__price' => array(
+    'entity_plus_property__shopify_product__price' => array(
       'base hook' => 'entity_plus_property',
     ),
   );
@@ -1622,7 +1622,7 @@ function shopify_get_text_format($selected = '') {
  * @param $variables
  * @return string
  */
-function theme_entity_property__shopify_product__body_html(&$variables) {
+function theme_entity_plus_property__shopify_product__body_html(&$variables) {
   // Get the raw HTML and run it through check_markup, rather than check_plain
   // which is used in entity_plus_property_default_render_value_by_type
   $variables['content'] = check_markup($variables['elements']['#entity_plus_wrapped']->{$variables['property_name']}->value(), shopify_get_text_format('full_html'));
@@ -1635,21 +1635,21 @@ function theme_entity_property__shopify_product__body_html(&$variables) {
 
   // Render the content.
   $content_suffix = '';
-  if (!$variables['label_hidden'] || $variables['content_attributes']) {
-    $output .= '<div' . $variables['content_attributes'] . '>';
+  if (!$variables['label_hidden'] || $variables['content_attributes_array']) {
+    $output .= '<div' . backdrop_attributes($variables['content_attributes_array']) . '>';
     $content_suffix = '</div>';
   }
   $output .= $variables['content'] . $content_suffix;
 
   // Render the top-level DIV.
-  return '<div' . $variables['attributes'] . '>' . $output . '</div>';
+  return '<div' . backdrop_attributes($variables['attributes_array']) . '>' . $output . '</div>';
 }
 
 /**
  * @param $variables
  * @return string
  */
-function theme_entity_property__shopify_product__price(&$variables) {
+function theme_entity_plus_property__shopify_product__price(&$variables) {
   if ($variables['content']) {
     $variables['content'] = shopify_money_format() . $variables['content'];
   }
@@ -1657,19 +1657,19 @@ function theme_entity_property__shopify_product__price(&$variables) {
 
   // Render the label, if it's not hidden.
   if (!$variables['label_hidden']) {
-    $output .= '<div' . $variables['title_attributes'] . '>' . $variables['label'] . ':&nbsp;</div>';
+    $output .= '<div' . backdrop_attributes($variables['title_attributes_array']) . '>' . $variables['label'] . ':&nbsp;</div>';
   }
 
   // Render the content.
   $content_suffix = '';
-  if (!$variables['label_hidden'] || $variables['content_attributes']) {
-    $output .= '<div' . $variables['content_attributes'] . '>';
+  if (!$variables['label_hidden'] || $variables['content_attributes_array']) {
+    $output .= '<div' . backdrop_attributes($variables['content_attributes_array']) . '>';
     $content_suffix = '</div>';
   }
   $output .= $variables['content'] . $content_suffix;
 
   // Render the top-level DIV.
-  return '<div' . $variables['attributes'] . '>' . $output . '</div>';
+  return '<div' . backdrop_attributes($variables['attributes_array']) . '>' . $output . '</div>';
 }
 
 /**

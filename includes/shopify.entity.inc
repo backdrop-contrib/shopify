@@ -427,10 +427,10 @@ class ShopifyProduct extends Entity implements EntityInterface {
           $tid = reset($term)->tid;
         }
         else {
-          $vocab = 'shopify_tags';
-          $term = new stdClass();
-          $term->name = $tag;
-          $term->vocabulary = $vocab;
+          $term = entity_create('taxonomy_term', array(
+            'vocabulary' => 'shopify_tags',
+            'name' => $tag,
+          ));
           taxonomy_term_save($term);
           $tid = $term->tid;
         }

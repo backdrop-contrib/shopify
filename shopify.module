@@ -521,10 +521,9 @@ function shopify_sync_deleted_collections(array $options = array()) {
   if (!isset($options['limit'])) {
     $options['limit'] = 250;
   }
-  for ($page = 1; $page <= ceil($collections_count / $options['limit']); $page++) {
+  for ($batch = 1; $batch <= ceil($collections_count / $options['limit']); $batch++) {
 
     // Setup default options for the products API call.
-    $options['page_info'] = $page;
     $options['fields'] = 'id';
 
     // Build a list of all products in the Shopify system.
@@ -542,7 +541,7 @@ function shopify_sync_deleted_collections(array $options = array()) {
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'taxonomy_term');
   $query->propertyCondition('vocabulary', 'shopify_collections');
-  if ($collection_ids) {
+  if (!empty($collection_ids)) {
     $query->fieldCondition('shopify_collection_id', 'value', $collection_ids, 'NOT IN');
   }
   $result = $query->execute();

@@ -427,10 +427,10 @@ class ShopifyProduct extends Entity implements EntityInterface {
           $tid = reset($term)->tid;
         }
         else {
-          $vocab = 'shopify_tags';
-          $term = new stdClass();
-          $term->name = $tag;
-          $term->vocabulary = $vocab;
+          $term = entity_create('taxonomy_term', array(
+            'vocabulary' => 'shopify_tags',
+            'name' => $tag,
+          ));
           taxonomy_term_save($term);
           $tid = $term->tid;
         }
@@ -521,7 +521,7 @@ class ShopifyProductController extends EntityPlusController {
       // Overrridden to hide labels by default
       '#label_hidden' => FALSE,
       '#label' => $info['label'],
-      '#entity_wrapped' => $wrapper,
+      '#entity_plus_wrapped' => $wrapper,
       '#theme' => 'entity_plus_property',
       '#property_name' => $name,
       '#access' => $property->access('view'),
@@ -551,7 +551,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('When the product was last updated.'),
       'schema field' => 'updated_at',
       'setter callback' => 'entity_property_verbatim_date_set',
-      'getter callback' => 'entity_property_verbatim_date_get',
+      'getter callback' => 'entity_plus_property_verbatim_date_get',
     );
     $info[$this->type]['properties']['created_at'] = array(
       'label' => t('Created Date'),
@@ -559,7 +559,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('When the product was created.'),
       'schema field' => 'created_at',
       'setter callback' => 'entity_property_verbatim_date_set',
-      'getter callback' => 'entity_property_verbatim_date_get',
+      'getter callback' => 'entity_plus_property_verbatim_date_get',
     );
     $info[$this->type]['properties']['published_at'] = array(
       'label' => t('Published Date'),
@@ -567,7 +567,7 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
       'description' => t('When the product was published.'),
       'schema field' => 'published_at',
       'setter callback' => 'entity_property_verbatim_date_set',
-      'getter callback' => 'entity_property_verbatim_date_get',
+      'getter callback' => 'entity_plus_property_verbatim_date_get',
     );
     $info[$this->type]['properties']['product_id'] = array(
       'label' => t('Product ID'),
@@ -741,145 +741,6 @@ class ShopifyProductMetadataController extends EntityDefaultMetadataController {
 
     return $info;
   }
-}
-
-/**
- * Class ShopifyProductsUIController
- */
-class ShopifyProductsUIController extends ShopifyEntityDefaultUIController {
-
-  /**
-   * Builds the entity overview form.
-   */
-  public function overviewForm($form, &$form_state) {
-    // Only show products, not variants.
-    $conditions = array('variant_id' => 0);
-    $form['table'] = $this->overviewTable($conditions);
-    $form['pager'] = array('#theme' => 'pager');
-    return $form;
-  }
-
-  /**
-   * Generates the render array for a overview table for arbitrary entities
-   * matching the given conditions.
-   *
-   * @param $conditions
-   *   An array of conditions as needed by entity_load().
-   * @return Array
-   *   A renderable array.
-   */
-  public function overviewTable($conditions = array()) {
-
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', $this->entityType);
-
-    // Add all conditions to query.
-    foreach ($conditions as $key => $value) {
-      $query->propertyCondition($key, $value);
-    }
-
-    if ($this->overviewPagerLimit) {
-      $query->pager($this->overviewPagerLimit);
-    }
-
-    $results = $query->execute();
-
-    $ids = isset($results[$this->entityType])?array_keys($results[$this->entityType]) : array();
-    $entities = $ids?entity_load($this->entityType, $ids) : array();
-    ksort($entities);
-
-    $rows = array();
-    foreach ($entities as $entity) {
-      $shopify_link = l(t('Edit on Shopify'), shopify_api_get_product_path($entity->product_id), array('attributes' => array('target' => '_blank')));
-      $rows[] = $this->overviewTableRow($conditions, entity_id($this->entityType, $entity), $entity, array($shopify_link));
-    }
-    $render = array(
-      '#theme' => 'table',
-      '#header' => $this->overviewTableHeaders($conditions, $rows),
-      '#rows' => $rows,
-      '#empty' => t('None.'),
-    );
-    return $render;
-  }
-
-  /**
-   * Generates the row for the passed entity and may be overridden in order to
-   * customize the rows.
-   *
-   * @param $additional_cols
-   *   Additional columns to be added after the entity label column.
-   */
-  protected function overviewTableRow($conditions, $id, $entity, $additional_cols = array()) {
-    $entity_uri = entity_uri($this->entityType, $entity);
-
-    $row[] = array(
-      'data' => array(
-        '#theme' => 'entity_ui_overview_item',
-        '#label' => entity_label($this->entityType, $entity),
-        '#name' => !empty($this->entityInfo['exportable'])?entity_id($this->entityType, $entity) : FALSE,
-        '#url' => $entity_uri ? $entity_uri : FALSE,
-        '#entity_type' => $this->entityType,
-      ),
-    );
-
-    // Add in any passed additional cols.
-    foreach ($additional_cols as $col) {
-      $row[] = $col;
-    }
-
-    // Add a row for the exportable status.
-    if (!empty($this->entityInfo['exportable'])) {
-      $row[] = array(
-        'data' => array(
-          '#theme' => 'entity_status',
-          '#status' => $entity->{$this->statusKey},
-        ),
-      );
-    }
-    // In case this is a bundle, we add links to the field ui tabs.
-    $field_ui = !empty($this->entityInfo['bundle of']) && entity_type_is_fieldable($this->entityInfo['bundle of']) && module_exists('field_ui');
-    // For exportable entities we add an export link.
-    $exportable = !empty($this->entityInfo['exportable']);
-    // If i18n integration is enabled, add a link to the translate tab.
-    $i18n = !empty($this->entityInfo['i18n controller class']);
-
-    // Add operations depending on the status.
-    if (entity_has_status($this->entityType, $entity, ENTITY_FIXED)) {
-      $row[] = array(
-        'data' => l(t('clone'), $this->path . '/manage/' . $id . '/clone'),
-        'colspan' => $this->operationCount(),
-      );
-    }
-    else {
-      $row[] = l(t('Edit Backdrop Entity'), $this->path . '/manage/' . $id);
-
-      if ($field_ui) {
-        $row[] = l(t('manage fields'), $this->path . '/manage/' . $id . '/fields');
-        $row[] = l(t('manage display'), $this->path . '/manage/' . $id . '/display');
-      }
-      if ($i18n) {
-        $row[] = l(t('translate'), $this->path . '/manage/' . $id . '/translate');
-      }
-      if ($exportable) {
-        $row[] = l(t('clone'), $this->path . '/manage/' . $id . '/clone');
-      }
-      if (entity_has_status($this->entityType, $entity, ENTITY_OVERRIDDEN)) {
-        $row[] = l(t('revert'), $this->path . '/manage/' . $id . '/revert', array('query' => backdrop_get_destination()));
-      }
-    }
-    if ($exportable) {
-      $row[] = l(t('export'), $this->path . '/manage/' . $id . '/export');
-    }
-    return $row;
-  }
-
-//  public function hook_menu() {
-//    parent::hook_menu();
-//    // @todo Add a nice page callback to point at Shopify's add product page.
-  // @todo Remove the Delete callback.
-  // @todo Remove the Add callback
-//  }
-
 }
 
 /**

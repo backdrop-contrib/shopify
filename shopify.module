@@ -1512,7 +1512,7 @@ function shopify_product_form($form, &$form_state, ShopifyProduct $product = NUL
         'class' => array('path-form'),
       ),
       '#attached' => array(
-        'js' => array(backdrop_get_path('module', 'path') . '/path.js'),
+        'js' => array(backdrop_get_path('module', 'path') . '/js/path.js'),
       ),
       '#access' => user_access('create url aliases') || user_access('administer url aliases'),
       '#weight' => 30,
@@ -1590,10 +1590,10 @@ function shopify_taxonomy_collection_term_uri($term) {
  */
 function shopify_theme($existing, $type, $theme, $path) {
   return array(
-    'entity_property__shopify_product__body_html' => array(
+    'entity_plus_property__shopify_product__body_html' => array(
       'base hook' => 'entity_plus_property',
     ),
-    'entity_property__shopify_product__price' => array(
+    'entity_plus_property__shopify_product__price' => array(
       'base hook' => 'entity_plus_property',
     ),
   );
@@ -1621,10 +1621,10 @@ function shopify_get_text_format($selected = '') {
  * @param $variables
  * @return string
  */
-function theme_entity_property__shopify_product__body_html(&$variables) {
+function theme_entity_plus_property__shopify_product__body_html(&$variables) {
   // Get the raw HTML and run it through check_markup, rather than check_plain
   // which is used in entity_plus_property_default_render_value_by_type
-  $variables['content'] = check_markup($variables['elements']['#entity_wrapped']->{$variables['property_name']}->value(), shopify_get_text_format('full_html'));
+  $variables['content'] = check_markup($variables['elements']['#entity_plus_wrapped']->{$variables['property_name']}->value(), shopify_get_text_format('full_html'));
   $output = '';
 
   // Render the label, if it's not hidden.
@@ -1634,21 +1634,21 @@ function theme_entity_property__shopify_product__body_html(&$variables) {
 
   // Render the content.
   $content_suffix = '';
-  if (!$variables['label_hidden'] || $variables['content_attributes']) {
-    $output .= '<div' . $variables['content_attributes'] . '>';
+  if (!$variables['label_hidden'] || $variables['content_attributes_array']) {
+    $output .= '<div' . backdrop_attributes($variables['content_attributes_array']) . '>';
     $content_suffix = '</div>';
   }
   $output .= $variables['content'] . $content_suffix;
 
   // Render the top-level DIV.
-  return '<div' . $variables['attributes'] . '>' . $output . '</div>';
+  return '<div' . backdrop_attributes($variables['attributes_array']) . '>' . $output . '</div>';
 }
 
 /**
  * @param $variables
  * @return string
  */
-function theme_entity_property__shopify_product__price(&$variables) {
+function theme_entity_plus_property__shopify_product__price(&$variables) {
   if ($variables['content']) {
     $variables['content'] = shopify_money_format() . $variables['content'];
   }
@@ -1656,19 +1656,19 @@ function theme_entity_property__shopify_product__price(&$variables) {
 
   // Render the label, if it's not hidden.
   if (!$variables['label_hidden']) {
-    $output .= '<div' . $variables['title_attributes'] . '>' . $variables['label'] . ':&nbsp;</div>';
+    $output .= '<div' . backdrop_attributes($variables['title_attributes_array']) . '>' . $variables['label'] . ':&nbsp;</div>';
   }
 
   // Render the content.
   $content_suffix = '';
-  if (!$variables['label_hidden'] || $variables['content_attributes']) {
-    $output .= '<div' . $variables['content_attributes'] . '>';
+  if (!$variables['label_hidden'] || $variables['content_attributes_array']) {
+    $output .= '<div' . backdrop_attributes($variables['content_attributes_array']) . '>';
     $content_suffix = '</div>';
   }
   $output .= $variables['content'] . $content_suffix;
 
   // Render the top-level DIV.
-  return '<div' . $variables['attributes'] . '>' . $output . '</div>';
+  return '<div' . backdrop_attributes($variables['attributes_array']) . '>' . $output . '</div>';
 }
 
 /**
@@ -1732,7 +1732,9 @@ function shopify_form_shopify_product_form_alter(&$form, &$form_state, $hook) {
   $edit_url = shopify_api_get_product_path($product->product_id, $product->variant_id);
 
   $form['help'] = array(
-    '#markup' => t('Product data synced with Shopify is not editable. Edit those fields on Shopify instead. <a href="!edit_url" target="_blank">!edit_url</a>', array('!edit_url' => $edit_url)),
+    '#prefix' => '<div class="messages info">',
+    '#markup' => t('Product data synced with Shopify is not editable. <a href="!edit_url" target="_blank">Edit those fields on Shopify instead</a>.', array('!edit_url' => $edit_url)),
+    '#suffix' => '</div>',
     '#weight' => -99,
   );
 
@@ -1810,10 +1812,10 @@ function shopify_ctools_plugin_api($owner, $client) {
 function shopify_autoload_info() {
   return array(
     'ShopifyEntityDefaultUIController' => 'includes/shopify.entity.ui.inc',
+    'ShopifyProductsUIController' => 'includes/shopify.entity.ui.inc',
     'ShopifyProduct' => 'includes/shopify.entity.inc',
     'ShopifyProductController' => 'includes/shopify.entity.inc',
     'ShopifyProductMetadataController' => 'includes/shopify.entity.inc',
-    'ShopifyProductsUIController' => 'includes/shopify.entity.inc',
     'ShopifyProductViewsController' => 'includes/shopify.entity.inc',
     'views_handler_field_shopify_price' => 'views/views_handler_field_shopify_price.inc',
     'views_handler_field_shopify_product' => 'views/views_handler_field_shopify_product.inc',

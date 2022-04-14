@@ -443,7 +443,12 @@ function shopify_install() {
   // Create field to track the collection ID from Shopify.
   $field = array(
     'field_name' => 'shopify_collection_id',
-    'type' => 'text',
+    'type' => 'number_decimal',
+    'cardinality' => 1,
+    'settings' => array(
+      'precision' => 12,
+      'scale' => 0,
+    ),
   );
   field_create_field($field);
 
